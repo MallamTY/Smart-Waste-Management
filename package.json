@@ -1,0 +1,19 @@
+{
+  "name": "smart-waste-system",
+  "version": "1.0.0",
+  "description": "Final year project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MallamTY/Smart-Waste-Management.git"
+  },
+  "author": "MallamTY",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MallamTY/Smart-Waste-Management/issues"
+  },
+  "homepage": "https://github.com/MallamTY/Smart-Waste-Management#readme"
+}
