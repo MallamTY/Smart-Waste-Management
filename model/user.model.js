@@ -1,5 +1,6 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+import mongoose, { Types } from 'mongoose';
+import bcrypt from 'bcrypt';
+
 
 
 const userSchema = new mongoose.Schema({
@@ -10,11 +11,9 @@ const userSchema = new mongoose.Schema({
         minlength: [3, `Firstname field can't be less than 3 characters !!!!!!!!`],
         maxlength: [50, `Firstname field can't be more than 50 characters !!!!!!!!`]
     },
-    middlename_name: {
+    middle_name: {
         type: String,
-        required: true,
         trim: true,
-        minlength: [3, `Firstname field can't be less than 3 characters !!!!!!!!`],
         maxlength: [50, `Firstname field can't be more than 50 characters !!!!!!!!`]
     },
     last_name: {
@@ -28,9 +27,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-
         trim: true
 
+    },
+    username: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true
     },
     password: {
         type: String,
@@ -42,11 +46,14 @@ const userSchema = new mongoose.Schema({
         required: true,
         maxlength: 200
     },
-    profile_picture_url: {
+    profile_image_url: {
         type: String
     },
 
-     profile_picture_secure_url: {
+    profile_image_secure_url: {
+        type: String
+    },
+    image_public_id: {
         type: String
     },
     address: {
@@ -56,7 +63,7 @@ const userSchema = new mongoose.Schema({
         trim: true
     },
     phone: {
-        type: Number,
+        type: String,
         trim: true,
         unique: true,
         maxlength: 15
@@ -66,15 +73,12 @@ const userSchema = new mongoose.Schema({
 },
 {timestamps: true});
 
-userSchema.pre("save", async function (next) {
-    if (this.password !== this.confirmpassword) {
-        throw Error('Password mismatch !!!!!')
-    }
+userSchema.pre("save", async function(next) {
 
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-    this.confirmpassword = await bcrypt.hash(this.confirmpassword, salt);
-
+    this.confirm_password = await bcrypt.hash(this.confirm_password, salt);
+   
     return next();
 })
 

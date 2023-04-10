@@ -3,6 +3,8 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import { MONGO_URI, PORT } from "./configuration/configuration.js";
+import Route from './routes/index.js'
+
 
 
 
@@ -12,6 +14,7 @@ const app = express();
 app.use(morgan('common'));
 app.use(cors());
 app.use(express.json());
+app.use('/api/v1/', Route)
 
 
 

@@ -11,9 +11,7 @@ const collectorSchema = new mongoose.Schema({
     },
     middlename_name: {
         type: String,
-        required: true,
         trim: true,
-        minlength: [3, `Firstname field can't be less than 3 characters !!!!!!!!`],
         maxlength: [50, `Firstname field can't be more than 50 characters !!!!!!!!`]
     },
     last_name: {
@@ -34,12 +32,13 @@ const collectorSchema = new mongoose.Schema({
         type: mongoose.Types.ObjectId(),
         ref: 'team' 
     },
-
-    profile_picture_url: {
+     profile_image_url: {
         type: String
     },
-
-     profile_picture_secure_url: {
+    profile_image_secure_url: {
+        type: String
+    },
+    image_public_id: {
         type: String
     },
     address: {
