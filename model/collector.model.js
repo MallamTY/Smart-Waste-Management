@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 
 const collectorSchema = new mongoose.Schema({
@@ -9,7 +9,7 @@ const collectorSchema = new mongoose.Schema({
         minlength: [3, `Firstname field can't be less than 3 characters !!!!!!!!`],
         maxlength: [50, `Firstname field can't be more than 50 characters !!!!!!!!`]
     },
-    middlename_name: {
+    middle_name: {
         type: String,
         trim: true,
         maxlength: [50, `Firstname field can't be more than 50 characters !!!!!!!!`]
@@ -23,13 +23,12 @@ const collectorSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        required: true,
         unique: true,
         trim: true
-
     },
+
     team: {
-        type: mongoose.Types.ObjectId(),
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'team' 
     },
      profile_image_url: {
@@ -48,7 +47,7 @@ const collectorSchema = new mongoose.Schema({
         trim: true
     },
     phone: {
-        type: Number,
+        type: String,
         trim: true,
         unique: true,
         maxlength: 15
@@ -59,5 +58,7 @@ const collectorSchema = new mongoose.Schema({
 {timestamps: true});
 
 const collectorModel = mongoose.model('collectors', collectorSchema);
-export default collectorModel;
 
+
+
+export default collectorModel;

@@ -10,10 +10,11 @@ class Respond {
         })
     }
 
-    successResponse = (res, StatusCodes, message) => {
+    successResponse = (res, StatusCodes, message, value) => {
         return res.status(StatusCodes).json({
             status: `success`,
-            message
+            message,
+            value
             
         })
     }
