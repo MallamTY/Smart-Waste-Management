@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import collectorModel from "../model/collector.model.js";
 import { Collector } from "../assessories/collector.class.js";
-import { Response } from "../assessories/error.class.js";
+import { Response } from "../assessories/response.class.js";
 import validator from "validator";
 import { uploads } from "../utility/cloudinary.js";
 

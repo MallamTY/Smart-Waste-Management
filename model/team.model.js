@@ -1,20 +1,27 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 
 const teamSchema = new mongoose.Schema({
-    team_name: {
+    name: {
         type: String,
         required: true,
         trim: true,
         minlength: [3, `Team name can't be less than 3 characters !!!!!!!!`],
         maxlength: [20, `Team name can't be more than 50 characters !!!!!!!!`]
     },
-    team_leader: {
-        type: mongoose.Types.ObjectId(),
+    area: {
+        type: String,
+        required: true,
+        trim: true,
+        minlength: [3, `Team name can't be less than 3 characters !!!!!!!!`],
+        maxlength: [100, `Team area can't be more than 50 characters !!!!!!!!`]
+    },
+    leader: {
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'collector'
     },
-    team_member: {
-        type: [mongoose.Types.ObjectId],
+    member: {
+        type: [mongoose.Schema.Types.ObjectId],
         ref: 'collector'
     }
    
