@@ -9,7 +9,7 @@ export class Collector extends Person {
      }
      
      save = async( profile_image_url, profile_image_secure_url, image_public_id) => {
-        console.log(this.middlename);
+        
         if (this.middlename === "" && this.email === "") {
             return await collectorModel.create({first_name: this.firstname, last_name: this.lastname, phone: this.phone, address: this.address, profile_image_url,profile_image_secure_url, image_public_id})
         }

@@ -3,7 +3,7 @@ import {StatusCodes} from 'http-status-codes';
 import { User } from '../assessories/user.class.js';
 import { uploads } from '../utility/cloudinary.js';
 import validator from 'validator';
-import { Response } from '../assessories/error.class.js';
+import { Response } from '../assessories/response.class.js';
 
 
 

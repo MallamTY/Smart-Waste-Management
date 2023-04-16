@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post('/register', multerUploads, CollectorController.registerCollector);
 
-router.get('/get-single/:id', CollectorController.getSingleCollector);
+router.get('/get-single', CollectorController.getSingleCollector);
 
 router.get('/get-all', CollectorController.getAllCollector);
 

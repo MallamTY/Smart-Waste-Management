@@ -25,7 +25,6 @@ class CollectorController{
             if (email && !validator.isEmail(email)) {
                 return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Invalid email format supplied`)
             }
-
             if (!first_name || !last_name || !address || !phone) {
                return res.status(StatusCodes.EXPECTATION_FAILED).json({
                     message: `failed`,
@@ -35,11 +34,17 @@ class CollectorController{
             
             const collector = new Collector(first_name, middle_name, last_name, email, phone, address);
             const existingCollector = await collector.getWithoutId(phone);
+
             if (existingCollector) {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Collector already registered')
+                
             }
 
-            else{
+            if (existingCollector && email === collector.email) {
+                return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Email already taken')
+            }
+
+        
                 
                 const cloud_collector_details = await uploads(req, 'Smart-Waste-Collector');
                 const created_user = await collector.save(cloud_collector_details.url, cloud_collector_details.secure_url, cloud_collector_details.public_id);
@@ -47,9 +52,10 @@ class CollectorController{
                 if (!created_user) {
                     return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, 'Error creating collector record this time')
                 }
+                
+                return Response.successResponse(res, StatusCodes.CREATED, `Collector successfully created ..`, created_user);
 
-                return Response.successResponse(res, StatusCodes.CREATED, `Collector successfully created ..`, created_user)
-            }
+
         } catch (error) {
             return Response.failedResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, error.message);
         }
@@ -67,7 +73,7 @@ class CollectorController{
 
     getSingleCollector = async(req, res) => {
         try {
-            const {params: {id}} = req;
+            const {body: {id}} = req;
 
             const collector = await collectorModel.findById(id);
 
