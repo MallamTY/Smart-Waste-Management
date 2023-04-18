@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../accessories/configuration.js";
+import { JWT_SECRET } from "../configuration/configuration.js";
 
 
 export const tokenGenerator = (user_id = '', role = '', email = '', username = '') => {

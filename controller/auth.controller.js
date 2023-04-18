@@ -1,9 +1,12 @@
 import { StatusCodes } from "http-status-codes";
-import { Response } from "../assessories/response.class";
+import { Response } from "../assessories/response.class.js";
+import User from "../model/user.model.js";
+import bcrypt from 'bcrypt';
+import { generateOTP } from "../utility/otp.js";
 
 
 
-class Authenticator {
+class AuthController {
     constructor () {
 
     }
@@ -11,10 +14,7 @@ class Authenticator {
     Login = async (req, res) => {
         try {
             
-            const reqbody = req.body
-            username = reqbody.username;
-            email = reqbody.email;
-            password = reqbody.password;
+            const {body: {username, password, email}} = req;
         
             if(!(username || email) && !password) {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, `All fields must be filled`)
@@ -56,3 +56,5 @@ class Authenticator {
         
     }
 }
+
+export default new AuthController();

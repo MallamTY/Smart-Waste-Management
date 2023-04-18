@@ -128,9 +128,9 @@ class CollectorController{
     updateCollector = async(req, res) => {
         try {
 
-           const {params: {id}, body: {middle_name, email}} = req;
+           const {body: {collector_id, middle_name, email}} = req;
 
-            const updated_user = await collectorModel.findByIdAndUpdate({_id:id}, {...req.body}, {new: true});
+            const updated_user = await collectorModel.findByIdAndUpdate({_id: collector_id}, {...req.body}, {new: true});
             
             if (!updated_user) {
                 Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, 'Error updating collector record this time');
@@ -170,9 +170,11 @@ class CollectorController{
     removeCollector = async(req, res) => {
         try {
             
-            const {params: {id}} = req;
+            const {body: {collector_id}} = req;
 
-            const deleted_user = await collectorModel.findByIdAndDelete(id);
+            const deleted_user = await collectorModel.findByIdAndDelete(collector_id);
+
+            
             if (deleted_user === null) {
                 return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, 'Collector already deleted');
             }

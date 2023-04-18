@@ -4,6 +4,9 @@ import { User } from '../assessories/user.class.js';
 import { uploads } from '../utility/cloudinary.js';
 import validator from 'validator';
 import { Response } from '../assessories/response.class.js';
+import Token from '../model/token.model.js';
+import { sendVerificationLink } from '../utility/emailSender.js';
+import { emailTokenGenerator } from '../utility/token.js';
 
 
 
@@ -17,7 +20,7 @@ class UserController {
         SignUp = async(req, res, next) => {
            try {
 
-            const {body: {first_name, last_name, middle_name = null, email, username, password, confirm_password, address, phone}} = req;
+            const {body: {first_name, last_name, middle_name, email, username, password, confirm_password, address, phone}} = req;
         
             if (!first_name || !last_name || !email || !password || !username || !confirm_password || !address || !phone) {
                return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `All required fields must be filled`)
@@ -49,10 +52,19 @@ class UserController {
                 // Upload user uploaded image to cloudinary
 
                 const cloud_user_details = await uploads(req, 'Smart-Waste-User');
-
+                
                 const created_user = await user.save(cloud_user_details.url, cloud_user_details.secure_url, cloud_user_details.public_id);
+
                 if (created_user) {
-                    return Response.successResponse(res, StatusCodes.CREATED, `User successfully created ..`, created_user)
+
+                const token = emailTokenGenerator(created_user.id, created_user.email, created_user.username);
+                
+                const expires =  Date.now() + 300000;
+                await Token.create({token, user: created_user.id, expires, type: 'Verification Link'});
+
+                await sendVerificationLink(created_user.email, created_user.username, token);
+
+                    return Response.successResponse(res, StatusCodes.CREATED, `An email confirmation link has been sent to your email address !!!!`)
                 }
                 else {
                     return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, `An error was encountered while trying to save your data this time, try again later ...`)

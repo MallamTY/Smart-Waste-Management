@@ -1,9 +1,7 @@
-import { RequestHandler } from "express";
-import jwt, {JwtPayload} from "jsonwebtoken";
-import { verifyToken } from "../utitlity/token";
-import {Response} from '../assessories/response.class.js'
-import { payloadJson } from "jsonwebtoken";
+
+import {Response} from '../assessories/response.class.js';
 import { StatusCodes } from "http-status-codes";
+import { verifyToken } from "../utility/token.js";
 
 const Authentication = (req, res, next) => {
     

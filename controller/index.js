@@ -1,6 +1,7 @@
 import userController from "./user.controller.js";
 import collectorController from "./collector.controller.js";
 import teamController from "./team.controller.js";
+import authController from "./auth.controller.js";
 
 
 // Users endpoints controller
@@ -8,6 +9,10 @@ import teamController from "./team.controller.js";
 const signUp = userController.SignUp;
 
 
+
+// Authentication Controllers
+
+const login = authController.Login;
 
 // Collectors endpoints controllers
 
@@ -36,6 +41,9 @@ export const UserController = {
     signUp
 }
 
+export const AuthController = {
+    login,
+}
 
 export const CollectorController = {
     registerCollector,
