@@ -13,6 +13,16 @@ const signUp = userController.SignUp;
 // Authentication Controllers
 
 const login = authController.Login;
+const verifyEmail = authController.verifyEmail;
+const resendEmailVerificiationLink = authController.resendEmailVerificiationLink;
+const verifyOTP = authController.verifyOTP;
+const resendOTP = authController.resendOTP;
+const forgetPassword = authController.forgetPassword;
+const resetPassword = authController.resetPassword;
+const updateUserProfile = authController.updateUserProfile;
+const updateProfilePicture = authController.updateProfilePicture;
+
+
 
 // Collectors endpoints controllers
 
@@ -41,8 +51,16 @@ export const UserController = {
     signUp
 }
 
+
 export const AuthController = {
     login,
+    resendEmailVerificiationLink,
+    verifyOTP,
+    resendOTP,
+    forgetPassword,
+    resetPassword,
+    updateUserProfile,
+    updateProfilePicture
 }
 
 export const CollectorController = {

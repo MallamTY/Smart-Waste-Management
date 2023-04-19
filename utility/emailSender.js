@@ -53,7 +53,7 @@ export const sendVerificationLink = async(to, username, token) => {
     const tokenTemplateValues = Templates.emailTemplate(url, username);
     const html = tokenTemplateValues.html;
 
-    await sendEmail(to,subject, html);
+    return await sendEmail(to,subject, html);
 }
 
 export const sendResetPasswordLink = async(to, username, token) => {
@@ -63,5 +63,5 @@ export const sendResetPasswordLink = async(to, username, token) => {
     const tokenTemplateValues = Templates.passwordResetTemplate(url, username);
     const html = tokenTemplateValues.html;
 
-    await sendEmail(to,subject, html);
+    return await sendEmail(to,subject, html);
 }
