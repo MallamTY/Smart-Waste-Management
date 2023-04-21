@@ -1,10 +1,11 @@
 import express from 'express';
 import teamController from '../controller/team.controller.js';
+import { Auth } from '../middleware/index.js';
 
 const router = express.Router();
 
 
-
+router.use(Auth.auth, Auth.userAuth);
 
 router.post('/create', teamController.createTeam);
 

@@ -2,6 +2,7 @@ import userController from "./user.controller.js";
 import collectorController from "./collector.controller.js";
 import teamController from "./team.controller.js";
 import authController from "./auth.controller.js";
+import emailController from "./email.controller.js";
 
 
 // Users endpoints controller
@@ -23,6 +24,12 @@ const updateUserProfile = authController.updateUserProfile;
 const updateProfilePicture = authController.updateProfilePicture;
 
 
+// Email Controller
+
+const createEmail = emailController.createEmail;
+const getSingleEmail = emailController.getSingleEmail;
+const getAllEmail = emailController.getAllEmail;
+const deleteEmail = emailController.deleteEmail;
 
 // Collectors endpoints controllers
 
@@ -55,12 +62,21 @@ export const UserController = {
 export const AuthController = {
     login,
     resendEmailVerificiationLink,
+    verifyEmail,
     verifyOTP,
     resendOTP,
     forgetPassword,
     resetPassword,
     updateUserProfile,
     updateProfilePicture
+}
+
+
+export const EmailController = {
+    createEmail,
+    getSingleEmail,
+    getAllEmail,
+    deleteEmail
 }
 
 export const CollectorController = {

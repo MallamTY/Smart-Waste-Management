@@ -7,6 +7,7 @@ import { Response } from '../assessories/response.class.js';
 import Token from '../model/token.model.js';
 import { sendVerificationLink } from '../utility/emailSender.js';
 import { emailTokenGenerator } from '../utility/token.js';
+import registeredEmailModel from '../model/users.email.model.js';
 
 
 
@@ -37,6 +38,12 @@ class UserController {
 
             if (!validator.isEmail(email)) {
                 return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Invalid email format supplied`)
+            }
+
+            const emailDB = await registeredEmailModel.findOne({email});
+
+            if (!emailDB) {
+                return Response.failedResponse(res, StatusCodes.BAD_REQUEST, `You can't singup this time, please contact the administrator.`);
             }
 
             const user = new User(first_name, middle_name, last_name, email, phone, address, username, password, confirm_password)

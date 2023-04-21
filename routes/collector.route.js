@@ -1,13 +1,14 @@
 import express from 'express';
 import { CollectorController } from '../controller/index.js';
 import { multerUploads } from '../services/multer.js';
-import UserAuthorization from '../middleware/verifyUser.js';
-import Authentication from '../middleware/auth.js';
+import { Auth } from '../middleware/index.js';
 
 
 const router = express.Router();
 
-router.use(Authentication, UserAuthorization)
+
+
+router.use(Auth.auth, Auth.userAuth); // user uthentication & authorization middleware to protect the routes;
 
 router.post('/register', multerUploads, CollectorController.registerCollector);
 
