@@ -3,6 +3,8 @@ import CollectorRoute from './collector.route.js';
 import TeamRoute from './team.route.js';
 import AuthRoute from './auth.route.js';
 import EmailRoute from './email.route.js'
+import ContainerRoute from './container.routes.js';
+
 import express from 'express';
 
 
@@ -21,6 +23,7 @@ router.use('/auth', AuthRoute);
 
 router.use('/email', EmailRoute);
 
+router.use('/container', ContainerRoute);
 
 export default router;
 

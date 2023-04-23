@@ -24,7 +24,7 @@ export const sendEmail = async(to,
             });
             
             const mailOptions = { 
-                from: `Smart-Waste-Management`,
+                from: `Smart-Waste-Management aderogbalilian@gmail.com`,
                 to,
                 subject,
                 html,
@@ -40,25 +40,16 @@ export const sendOTP = async(to, username, otp) => {
     const otpTemplateValues = Templates.emailOTPTemplate(otp, username);
     const email = to;
     const html = otpTemplateValues.html;
-    const subject = 'Login One-Time-Password';
+    const subject = 'Your verification OTP';
 
     await sendEmail(email, subject, html);
-}
+};
 
 
-export const sendVerificationLink = async(to, username, token) => {
-
-    const url = `http://localhost:7000/api/v1/auth/verify-email/${token}`;
-    const subject = 'Verification Link';
-    const tokenTemplateValues = Templates.emailTemplate(url, username);
-    const html = tokenTemplateValues.html;
-
-    return await sendEmail(to,subject, html);
-}
 
 export const sendResetPasswordLink = async(to, username, token) => {
 
-    const url = `http://localhost:7000/api/v1/auth/login/auth/reset-password/${token}`;
+    const url = `http://localhost:7000/api/v1/auth/reset-password/${token}`;
     const subject = 'Reset Password';
     const tokenTemplateValues = Templates.passwordResetTemplate(url, username);
     const html = tokenTemplateValues.html;

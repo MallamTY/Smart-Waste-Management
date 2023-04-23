@@ -5,9 +5,9 @@ import { uploads } from '../utility/cloudinary.js';
 import validator from 'validator';
 import { Response } from '../assessories/response.class.js';
 import Token from '../model/token.model.js';
-import { sendVerificationLink } from '../utility/emailSender.js';
-import { emailTokenGenerator } from '../utility/token.js';
+import { sendOTP} from '../utility/emailSender.js';
 import registeredEmailModel from '../model/users.email.model.js';
+import { generateOTP } from '../utility/otp.js';
 
 
 
@@ -56,22 +56,18 @@ class UserController {
 
             else{
                 
-                // Upload user uploaded image to cloudinary
-
-                const cloud_user_details = await uploads(req, 'Smart-Waste-User');
                 
-                const created_user = await user.save(cloud_user_details.url, cloud_user_details.secure_url, cloud_user_details.public_id);
+                const created_user = await user.save();
 
                 if (created_user) {
-
-                const token = emailTokenGenerator(created_user.id, created_user.email, created_user.username);
                 
-                const expires =  Date.now() + 300000;
-                await Token.create({token, user: created_user.id, expires, type: 'Verification Link'});
+                    const otp = generateOTP(6);
+                    const expires =  Date.now() + 300000;
+                    await Token.create({token: otp, user: created_user.id, expires, type: 'Verification OTP'});
 
-                await sendVerificationLink(created_user.email, created_user.username, token);
+                    await sendOTP(user.email, user.username, otp);
 
-                    return Response.successResponse(res, StatusCodes.CREATED, `An email confirmation link has been sent to your email address !!!!`)
+                    return Response.successResponse(res, StatusCodes.CREATED, `An OTP has been sent to your email address !!!!`)
                 }
                 else {
                     return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, `An error was encountered while trying to save your data this time, try again later ...`)

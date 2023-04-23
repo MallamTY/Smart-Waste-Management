@@ -3,36 +3,54 @@ import validator from "validator";
 import {Response} from '../assessories/response.class.js';
 import { StatusCodes } from "http-status-codes";
 import { response } from "express";
-import constainerModel from "../model/container.model.js";
+import containerModel from "../model/container.model.js";
+import teamModel from "../model/team.model.js";
 
 
 
 
-class EmailController {
+class ContainerController {
     constructor () {
 
     }
 
-    createEmail = async(req, res) => {
-        const {body: {location, volume}} = req;
+    registerContainer = async(req, res) => {
+
+       try {
+        
+        const {body: {location, volume, team}} = req;
 
         if (!location || !volume) {
             return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'All field is required');
         }
 
-        const container = await constainerModel.create({location, volume});
+        const db_container = await containerModel.findOne({location});
+
+        if (db_container) {
+            return Response.failedResponse(res, StatusCodes.CONFLICT, 'Container already register !!!');
+        }
+        const db_team = await teamModel.findOne({name: team});
+        
+        if (!db_team) {
+            return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'Team not registered yet');
+        }
+        const container = await containerModel.create({location, volume, team_responsible: team});
 
         if (!container) {
             return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, 'Unable to register container this time, please try again');
         }
 
         return Response.successResponse(res, StatusCodes.CREATED, 'Email registered', container);
+        
+       } catch (error) {
+        return Response.failedResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, error.message);
+       }
     }
 
     getAllContainer = async(req, res) => {
         try {
             
-            const containers = await constainerModel.find();
+            const containers = await containerModel.find();
 
             if (!containers) {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'No container registered this time');
@@ -46,9 +64,9 @@ class EmailController {
 
     getSingleContainer = async(req, res) => {
         try {
-            const {body: {id}} = req;
+            const {body: {container_id}} = req;
 
-            const container = await constainerModel.findById(id);
+            const container = await containerModel.findById(container_id);
 
             if (!container) {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'container record not found');
@@ -63,17 +81,26 @@ class EmailController {
 
     updateContainer = async(req, res) => {
         try {
-            const {body: {id, location, volume}} = req;
+            const {body: {container_id, location, volume, team}} = req;
 
-            if (!id || !(location && volume)) {
-                return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'Some required filed are ID and location and/or volume filed must be filled !!!')
+            if (!container_id || (!location && !volume && !team)) {
+                return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'Some required filed like container_id and location, team and/or volume filed must be filled !!!')
             }
+            
+            if (team) {
+                const db_team = await teamModel.findOne({name: team});
+        
+                if (!db_team) {
+                    return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'Team not registered yet');
+                }
 
-            const updatedContainer = await constainerModel.findByIdAndUpdate({_id:id}, {...req.body}, {new: true});
+            }
+            const updatedContainer = await containerModel.findByIdAndUpdate({_id: container_id}, {team_responsible: team,...req.body}, {new: true});
 
             if (!updatedContainer) {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Unable to update container record this time');
             }
+
 
             return Response.successResponse(res, StatusCodes.OK, 'Container record updated', updatedContainer);
 
@@ -91,7 +118,7 @@ class EmailController {
                 return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'Container ID and Object volume is required');
             }
 
-            const container = await constainerModel.findById(container_id);
+            const container = await containerModel.findById(container_id);
 
             if (!container) {
                 return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'Container not found !!!')
@@ -122,15 +149,15 @@ class EmailController {
     deleteContainer = async(req, res) => {
         try {
             
-            const {body: {id}} = req;
+            const {body: {container_id}} = req;
 
-            const deletedContainer = await registeredEmailModel.findByIdAndDelete(id);
+            const deletedContainer = await containerModel.findByIdAndDelete(container_id);
 
             if (!deletedContainer) {
                 return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'Error deleting container !!!')
             }
 
-            return Response.successResponse(res, StatusCodes.OK, 'Container deleted', deletedEmail);
+            return Response.successResponse(res, StatusCodes.OK, 'Container deleted', deletedContainer);
 
 
         } catch (error) {

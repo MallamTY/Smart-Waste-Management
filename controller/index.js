@@ -3,6 +3,7 @@ import collectorController from "./collector.controller.js";
 import teamController from "./team.controller.js";
 import authController from "./auth.controller.js";
 import emailController from "./email.controller.js";
+import containerController from "./container.controller.js";
 
 
 // Users endpoints controller
@@ -14,14 +15,24 @@ const signUp = userController.SignUp;
 // Authentication Controllers
 
 const login = authController.Login;
-const verifyEmail = authController.verifyEmail;
-const resendEmailVerificiationLink = authController.resendEmailVerificiationLink;
-const verifyOTP = authController.verifyOTP;
+const verifyAccount = authController.verifyAccount;
+const uploadProfilePicture = authController.uploadProfilePicture;
 const resendOTP = authController.resendOTP;
 const forgetPassword = authController.forgetPassword;
 const resetPassword = authController.resetPassword;
 const updateUserProfile = authController.updateUserProfile;
 const updateProfilePicture = authController.updateProfilePicture;
+
+
+// Container Controllers
+
+const registerContainer = containerController.registerContainer;
+const getAllContainer = containerController.getAllContainer;
+const getSingleContainer = containerController.getSingleContainer;
+const updateContainer = containerController.updateContainer;
+const addObject = containerController.addObject;
+const deleteContainer = containerController.deleteContainer;
+
 
 
 // Email Controller
@@ -61,14 +72,23 @@ export const UserController = {
 
 export const AuthController = {
     login,
-    resendEmailVerificiationLink,
-    verifyEmail,
-    verifyOTP,
+    verifyAccount,
+    uploadProfilePicture,
     resendOTP,
     forgetPassword,
     resetPassword,
     updateUserProfile,
     updateProfilePicture
+}
+
+
+export const ContainerController = {
+    registerContainer,
+    getAllContainer,
+    getSingleContainer,
+    updateContainer,
+    addObject,
+    deleteContainer
 }
 
 

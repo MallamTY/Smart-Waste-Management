@@ -11,22 +11,22 @@ export class User extends Person {
         this.confirm_password = confirm_password;
     }
 
-      save = async( profile_image_url, profile_image_secure_url, image_public_id) => {
+      save = async() => {
 
         if (this.middlename === "" && this.email === "") {
-            return await userModel.create({first_name: this.firstname, last_name: this.lastname, phone: this.phone, username: this.username, address: this.address, password: this.password, confirm_password: this.confirm_password,profile_image_url, profile_image_secure_url, image_public_id})
+            return await userModel.create({first_name: this.firstname, last_name: this.lastname, phone: this.phone, username: this.username, address: this.address, password: this.password, confirm_password: this.confirm_password})
         }
         
         else if (this.middlename === "" && this.email !== "") {
-            return await userModel.create({first_name: this.firstname, last_name: this.lastname, email: this.email, phone: this.phone, username: this.username,address: this.address, password: this.password, confirm_password: this.confirm_password, profile_image_url,profile_image_secure_url, image_public_id})
+            return await userModel.create({first_name: this.firstname, last_name: this.lastname, email: this.email, phone: this.phone, username: this.username,address: this.address, password: this.password, confirm_password: this.confirm_password})
         }
            
         else if (this.middlename !== "" && this.email === "")
         {
-            return await userModel.create({first_name: this.firstname, last_name: this.lastname, middle_name: this.middlename, phone: this.phone, username: this.username,address: this.address, password: this.password, confirm_password: this.confirm_password, profile_image_url,profile_image_secure_url, image_public_id})
+            return await userModel.create({first_name: this.firstname, last_name: this.lastname, middle_name: this.middlename, phone: this.phone, username: this.username,address: this.address, password: this.password, confirm_password: this.confirm_password})
         }
         else {
-            return await userModel.create({first_name: this.firstname, last_name: this.lastname, middle_name: this.middlename, email: this.email, phone: this.phone, username: this.username, password: this.password, confirm_password: this.confirm_password, address: this.address, profile_image_url,profile_image_secure_url, image_public_id})
+            return await userModel.create({first_name: this.firstname, last_name: this.lastname, middle_name: this.middlename, email: this.email, phone: this.phone, username: this.username, password: this.password, confirm_password: this.confirm_password, address: this.address})
         }
 
      }

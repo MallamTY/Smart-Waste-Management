@@ -1,12 +1,13 @@
 import { StatusCodes } from "http-status-codes";
+import validator from "validator";
 import { Response } from "../assessories/response.class.js";
 import User from "../model/user.model.js";
 import bcrypt from 'bcrypt';
 import { generateOTP } from "../utility/otp.js";
-import { emailTokenGenerator, verifyToken } from "../utility/token.js";
+import { emailTokenGenerator, tokenGenerator, verifyToken } from "../utility/token.js";
 import Token from "../model/token.model.js";
-import { sendOTP, sendResetPasswordLink, sendVerificationLink } from "../utility/emailSender.js";
-import { response } from "express";
+import { sendOTP, sendResetPasswordLink } from "../utility/emailSender.js";
+import { deleteImage, uploads } from "../utility/cloudinary.js";
 
 
 
@@ -24,30 +25,26 @@ class AuthController {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, `All fields must be filled`)
             }
         
-            let userDB = await User.findOne({$or: [{username}, {email}]})
-            if (!userDB) {
+            let user = await User.findOne({$or: [{username}, {email}]})
+            if (!user) {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Invalid credentials !!!!!')
             }
-            const match = await bcrypt.compare(password, userDB.password);
+            const match = await bcrypt.compare(password, user.password);
             
             if (!match) {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, `Invalid email or password !!!!!!!!!`)
             }
         
-            if (userDB.isEmailVerified === false) {
-                return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Account not verified yet, click on the verification link sent to your email !!!!!!!!!`)
+            if (user.isEmailVerified === false) {
+                return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Account not verified yet, check your registered email for otp to verify your email !!!`);
             }
             
-            const otp = generateOTP(6);
-            const expires = Date.now() + 300000;
-        
-            await sendOTP(userDB.email, userDB.username, otp);
-            await Token.create({token: otp, user: userDB.id, expires, type: 'Login OTP'});
+            const token = tokenGenerator(user.id, user.role, user.email, user.username);
         
             return res.status(StatusCodes.OK).json({
                 status: `success`,
-                message: `A one-time-password has been sent to your registered email address ... ${otp}`,
-                user: userDB
+                message: `Login successful ...`,
+                token
             })
             
         
@@ -60,31 +57,32 @@ class AuthController {
         
     }
 
-    verifyEmail = async(req, res, next) => {
+    verifyAccount = async(req, res, next) => {
     
         try {
-            const {params: {token}} = req;
-            const payload = verifyToken(token);
-            const db_token = await Token.findOne({user: payload.user_id, type: 'Verification Link'})
-        
-            if(!token) {
-                return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Invalid link !!!!!!!!!`)
-            }
-    
-            if (!payload) {
-                return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Error completing this operation !!!!!!!!!`)
-            }
-    
-            if (!db_token) {
-                return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Expired link !!!!!!!!!`)
-                
+            const {body: {otp}, params: {user_id}} = req;
+
+            if (!otp) {
+                return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'one-time-password must be supplied');
             }
             
-            const {user_id} = payload;
+            const db_otp = await Token.findOne({user: user_id, type: 'Verification OTP'});
+
+            if(!db_otp) {
+                return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Invalid one-time-password, please resend OTP`);
+            };
+
+            if (otp !== db_otp.token) {
+                return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'Incorrect one-time-password');
+            }
+
+            if (Date.now() > db_otp.expires) {
+                return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'one-time-password');
+            }
             const db_user = await User.findById(user_id);
 
             if (db_user.isEmailVerified === true) {
-                return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Linked already used !!!!!!!!!`)
+                return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Account already verified`)
             }
             
             const user = await User.findByIdAndUpdate({_id: user_id}, {isEmailVerified: true}, {new: true});
@@ -96,64 +94,6 @@ class AuthController {
     }
     };
     
-    resendEmailVerificiationLink = async(req, res, next) => {
-        try {
-            const {params: {token}} = req;
-            const payload = verifyToken(token);
-    
-            const newToken = emailTokenGenerator(payload.id, payload.email, payload.username);
-            const expires =  Date.now() + 300000;
-            await Token.create({token, user: payload.id, expires, type: 'Verification Link'});
-            await sendVerificationLink(payload.email, payload.username, newToken);
-    
-            return Response.successResponse(res, StatusCodes.OK, `Verification link has been resent to ${payload.email}`, sent);
-        
-        } catch (error) {
-            return Response.failedResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, error.message);
-        }
-    }
-    
-    verifyOTP = async(req, res, next) => {
-    
-        try {
-    
-            const {params: {user_id},
-                    body: {otp}
-                                    } = req;
-            if (!user_id) {
-                return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Invalid credentials !!!!!!!!!`)
-            }
-        
-            const db_token = await Token.findOne({user: user_id, type: 'Login OTP'});
-            
-            if(db_token) {
-                if (db_token.token === otp) {
-                    if (db_token.valid) {
-                        const login_user = await User.findById(user_id);
-                        const token = tokenGenerator(user_id, login_user.role, login_user.email, login_user.username);
-         
-                        if (token) {
-                            db_token.valid = false;
-                            db_token.save();
-                            return Response.failedResponse(res, StatusCodes.OK, `Login successful ..........`, token);
-                    }
-    
-                    return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Unable to generate login token !!!`);
-    
-                }
-                return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Invalid one-time-password !!!`,);
-                
-            }
-            return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Invalid one-time-password !!!`)
-        }
-        return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Your one-time-password has expired !!!`)
-    
-        } catch (error) {
-            return Response.failedResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, error.message);
-        }
-    
-    }
-    
     resendOTP = async(req, res, next) => {
         try {
             const {body: {user_id},
@@ -162,22 +102,22 @@ class AuthController {
             const user_db = await User.findById(user_id);
             const otp = generateOTP(6);
             
-            const db_OTP = await Token.findOne({user: user_id, type: 'Login OTP'});
+            const db_otp = await Token.findOne({user: user_id, type: 'Verification OTP'});
             
             
-            if(db_OTP) {
+            if(db_otp) {
                 const expires = Date.now() + 300000;
                 await sendOTP(user_db.email, user_db.username, otp);
-                const updated_otp = await Token.findByIdAndUpdate(db_OTP.id, {token: otp, expires}); 
+                const updated_otp = await Token.findByIdAndUpdate(db_otp.id, {token: otp, expires}); 
     
-                return Response.successResponse(res, StatusCodes.OK, `A one-time-pssword has been resent to your registered email address ...`, updated_otp.token)
+                return Response.successResponse(res, StatusCodes.OK, `A one-time-pssword has been resent to your registered email address ...`)
             }
     
             const expires = Date.now() + 300000;
             await sendOTP(user_db.email, user_db.username, otp);
-            const token = await Token.create({token: otp, user: user_id, expires, type: 'Login OTP'});
+            await Token.create({token: otp, user: user_id, expires, type: 'Verification OTP'});
             
-            return Response.successResponse(res, StatusCodes.CREATED, `A one-time-pssword has been resent to your registered email address ...`, token);
+            return Response.successResponse(res, StatusCodes.CREATED, `A one-time-pssword has been resent to your registered email address ...`);
     
         } catch (error) {
             return Response.failedResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, error.messgae);
@@ -207,14 +147,14 @@ class AuthController {
             const db_token = await Token.findOne({user: db_user.id, type: 'Password Reset'});
             
             if (db_token) {
-                const expires = Date.now() + 300000;
+                const expires = Date.now() + 600000;
                 sendResetPasswordLink(db_user.email, db_user.username, token);
                 await Token.findByIdAndUpdate(db_token.id, {token, expires});
             
                 return Response.successResponse(res, StatusCodes.OK, `A password reset link has been resent to ${db_user.email}`);
                  
             }
-            const expires = Date.now() + 300000;
+            const expires = Date.now() + 600000;
             sendResetPasswordLink(db_user.email, db_user.username, token);
             await Token.create({token, user: db_user.id, expires, type: 'Password Reset'});
     
@@ -228,7 +168,6 @@ class AuthController {
     resetPassword = async(req, res, next) => {
     
         try {
-    
     
                 const {body: {new_password, confirm_new_password},
                 params: {token}
@@ -277,27 +216,57 @@ class AuthController {
         }
     }
     
+
+    uploadProfilePicture = async(req, res, next) => {
+        try {
+            
+            const {user: {user_id}} = req;
+
+            if (!user_id) {
+                return Response(res, StatusCodes.FORBIDDEN, 'You must login to perform this operation');
+            }
+
+            const user = await User.findById(user_id);
+
+            const cloud_user_details = await uploads(req, 'Smart-Waste-System-User');
+
+            const {public_id, url, secure_url} = cloud_user_details;
+    
+            user.image_public_id = public_id;
+            user.profile_image_secure_url = secure_url;
+            user.profile_image_url = url;
+
+            const updated_user = await user.save();
+    
+            if (!updated_user) {
+                return Response.failedResponse(res, StatusCodes, `Error encountered while trying to update your profile picture`);
+            }
+    
+            return Response.successResponse(res, StatusCodes.OK, 'Profile picture successfully uploaded', updated_user);
+
+        } catch (error) {
+            return Response.failedResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, error.message);
+        }
+    }
     
     updateUserProfile = async(req, res, next) => {
         try {
             const {user: {user_id}, body: {username, email}} = req;
-            if (!username || !email) {
-                return Response.failedResponse(res, StatusCodes.BAD_REQUEST, `No field specified for update`);
-            }
-    
+
             if(username){
                 const db_user = await User.findOne({username});
                 if (db_user) {
-                    return Response.failedResponse(StatusCodes.BAD_REQUEST, `Username already exist`);
+                    return Response.failedResponse(res, StatusCodes.BAD_REQUEST, `Username already exist`);
                 }
             }
             if (email) {
                 const db_user = await User.findOne({email});
                 if (db_user) {
-                    return Response.failedResponse(res, StatusCodes.BAD_REQUEST, `email already exist`);
+                    return Response.failedResponse(res, StatusCodes.BAD_REQUEST, `Email already exist`);
                 }
             }
             const updated_user = await User.findByIdAndUpdate({_id: user_id}, {...req.body}, {new: true});
+
             if (!updated_user) {
                 return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Error encountered while trying to update your record`);
             }
@@ -306,7 +275,7 @@ class AuthController {
 
 
         } catch (error) {
-            return Response.failedResponse(Res, StatusCodes.INTERNAL_SERVER_ERROR, error.message);
+            return Response.failedResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, error.message);
         }
     
     }
@@ -315,19 +284,18 @@ class AuthController {
     updateProfilePicture = async(req, res, next) => {
         try {
             const {user: {user_id}} = req;
-    
+
             if (!req.file) {
                 return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Picture not selected`);
             }
             const db_user = await User.findById(user_id);
+
+            await deleteImage(db_user.image_public_id);
     
-            deleteImage(db_user.profilepicture_public_url);
-    
-            const cloud_image = await uploads(req,'Users');
-            
+            const cloud_image = await uploads(req, 'Smart-Waste-System-User');
             const {public_id, url, secure_url} = cloud_image;
-    
-            db_user.profilepicture_public_url = public_id;
+
+            db_user.image_public_id = public_id;
             db_user.profile_image_secure_url = secure_url;
             db_user.profile_image_url = url;
 

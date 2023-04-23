@@ -19,7 +19,6 @@ const containerSchema = new mongoose.Schema({
     team_responsible: {
         type: String,
         required: true,
-        unique: true,
         trim: true,
         ref: 'team'
     },
