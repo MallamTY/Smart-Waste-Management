@@ -22,7 +22,7 @@ class UserController {
            try {
 
             const {body: {first_name, last_name, middle_name, email, username, password, confirm_password, address, phone}} = req;
-        
+
             if (!first_name || !last_name || !email || !password || !username || !confirm_password || !address || !phone) {
                return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `All required fields must be filled`)
             }
@@ -36,19 +36,19 @@ class UserController {
                 return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Password not match !!!`)
             }
 
-            if (!validator.isEmail(email)) {
+            if (!validator.isEmail(email.toLowerCase())) {
                 return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Invalid email format supplied`)
             }
 
-            const emailDB = await registeredEmailModel.findOne({email});
+            const emailDB = await registeredEmailModel.findOne({email: email.toLowerCase()});
 
             if (!emailDB) {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, `You can't singup this time, please contact the administrator.`);
             }
 
-            const user = new User(first_name, middle_name, last_name, email, phone, address, username, password, confirm_password)
+            const user = new User(first_name, middle_name, last_name, email.toLowerCase(), phone, address, username, password, confirm_password)
             
-            const existingUser = await user.getWithoutId(email, username, phone);
+            const existingUser = await user.getWithoutId(email.toLowerCase(), username, phone);
             
             if (existingUser) {
                 return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `User already registered`)

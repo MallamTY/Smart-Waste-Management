@@ -32,7 +32,8 @@ class CollectorController{
                 })
             }
             
-            const collector = new Collector(first_name, middle_name, last_name, email, phone, address);
+            const collector = new Collector(first_name, middle_name, last_name, email.toLowerCase(), phone, address);
+
             const existingCollector = await collector.getWithoutId(phone);
 
             if (existingCollector) {
@@ -40,7 +41,7 @@ class CollectorController{
                 
             }
 
-            if (existingCollector && email === collector.email) {
+            if (existingCollector && email.toLowerCase() === collector.email) {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Email already taken')
             }
 
@@ -143,7 +144,7 @@ class CollectorController{
                 if (!validator.isEmail(email)) {
                     return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Invalid email format supplied`);
                 }
-                updated_user.email = email;
+                updated_user.email = email.toLowerCase();
                 updated_user.save();
                 
             }

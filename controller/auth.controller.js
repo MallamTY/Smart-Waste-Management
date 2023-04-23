@@ -25,7 +25,7 @@ class AuthController {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, `All fields must be filled`)
             }
         
-            let user = await User.findOne({$or: [{username}, {email}]})
+            let user = await User.findOne({$or: [{username}, {email:email.toLowerCase()}]})
             if (!user) {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Invalid credentials !!!!!')
             }
@@ -132,7 +132,7 @@ class AuthController {
                 return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Invalid email address !!!`);
             }
     
-            const db_user = await User.findOne({$or: [{email}, {username}]});
+            const db_user = await User.findOne({$or: [{email: email.toLowerCase()}, {username}]});
     
             if (!db_user) {
                 return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `User not found !!!`)
@@ -260,7 +260,7 @@ class AuthController {
                 }
             }
             if (email) {
-                const db_user = await User.findOne({email});
+                const db_user = await User.findOne({email: email.toLowerCase()});
                 if (db_user) {
                     return Response.failedResponse(res, StatusCodes.BAD_REQUEST, `Email already exist`);
                 }
