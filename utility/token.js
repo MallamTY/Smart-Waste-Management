@@ -13,7 +13,7 @@ export const tokenGenerator = (user_id = '', role, email = '', username = '') =>
     else if (email === '' && username === '') {
         return token = jwt.sign({user_id, role}, JWT_SECRET, {expiresIn: '2d'})
     }
-    return token = jwt.sign({user_id, role, email, username}, JWT_SECRET, {expiresIn: '2d'})
+    return token = jwt.sign({user_id, role, email, username}, JWT_SECRET, {expiresIn: '2d'});
 }
 
 
