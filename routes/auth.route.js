@@ -2,10 +2,11 @@ import express from 'express';
 import {AuthController} from '../controller/index.js';
 import { Auth } from '../middleware/index.js';
 import { multerUploads } from '../services/multer.js';
+import authController from '../controller/auth.controller.js';
 
 const router = express.Router();
 
-
+router.post('/test', multerUploads, authController.Test);
 router.post('/login', AuthController.login);
 
 router.put('/verify-account/:user_id', AuthController.verifyAccount);

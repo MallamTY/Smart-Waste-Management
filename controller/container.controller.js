@@ -1,8 +1,6 @@
 import registeredEmailModel from "../model/users.email.model.js";
-import validator from "validator";
 import {Response} from '../assessories/response.class.js';
 import { StatusCodes } from "http-status-codes";
-import { response } from "express";
 import containerModel from "../model/container.model.js";
 import teamModel from "../model/team.model.js";
 

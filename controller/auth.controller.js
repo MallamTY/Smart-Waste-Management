@@ -16,6 +16,10 @@ class AuthController {
 
     }
 
+
+    Test = (req, res) => {
+        uploads(req, 'Test')
+    }
     Login = async (req, res) => {
         try {
             
