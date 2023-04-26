@@ -13,4 +13,4 @@ const registeredEmailSchema = new mongoose.Schema({
 
 
 const registeredEmailModel = mongoose.model('email', registeredEmailSchema);
-export default registeredEmailModel;
+export default registeredEmailModel
