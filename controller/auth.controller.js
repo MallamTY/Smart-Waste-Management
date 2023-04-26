@@ -29,14 +29,20 @@ class AuthController {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, `All fields must be filled`)
             }
         
-            let user = await User.findOne({$or: [{username}, {email:email.toLowerCase()}]})
+            let user;
+
+            if (email) {
+                user = await User.findOne({email});
+            }
+            user = await User.findOne({username});
+
             if (!user) {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Invalid credentials !!!!!')
             }
             const match = await bcrypt.compare(password, user.password);
             
             if (!match) {
-                return Response.failedResponse(res, StatusCodes.BAD_REQUEST, `Invalid email or password !!!!!!!!!`)
+                return Response.failedResponse(res, StatusCodes.BAD_REQUEST, `Invalid login credentials !!!`)
             }
         
             if (user.isEmailVerified === false) {
@@ -135,9 +141,14 @@ class AuthController {
             if(!validator.isEmail(email)) {
                 return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Invalid email address !!!`);
             }
-    
-            const db_user = await User.findOne({$or: [{email: email.toLowerCase()}, {username}]});
-    
+            
+            let db_user;
+            if (email) {
+                db_user = await User.findOne({email: email.toLowerCase()});
+            }
+            
+            db_user = await User.findOne({username});
+
             if (!db_user) {
                 return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `User not found !!!`)
             }

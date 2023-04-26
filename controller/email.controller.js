@@ -23,7 +23,7 @@ class EmailController {
             return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'Please enter a valid email address');
         }
 
-        const existingEmail = await registeredEmailModel.findOne({email});
+        const existingEmail = await registeredEmailModel.findOne({email: email.toLowerCase()});
 
         if (existingEmail) {
             return Response.failedResponse(res, StatusCodes.CONFLICT, 'Email address already taken');

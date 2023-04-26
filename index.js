@@ -18,7 +18,7 @@ app.use(express.json());
 app.use('/api/v1/', Route)
 
 
-app.get('/', (req, res) => {
+app.get('*', (req, res) => {
     res.status(StatusCodes.OK).send(`Smart Waste Management System API`);
 })
 

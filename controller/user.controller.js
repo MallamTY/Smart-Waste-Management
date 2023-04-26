@@ -67,7 +67,7 @@ class UserController {
 
                     await sendOTP(user.email, user.username, otp);
 
-                    return Response.successResponse(res, StatusCodes.CREATED, `An OTP has been sent to your email address !!!!`)
+                    return Response.successResponse(res, StatusCodes.CREATED, `An OTP has been sent to your email address !!!!`, created_user);
                 }
                 else {
                     return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, `An error was encountered while trying to save your data this time, try again later ...`)
