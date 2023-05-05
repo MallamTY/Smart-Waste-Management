@@ -24,7 +24,7 @@ class AuthController {
         try {
             
             const {body: {username, password, email}} = req;
-        
+            
             if(!(username || email) && !password) {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, `All fields must be filled`)
             }
@@ -34,8 +34,11 @@ class AuthController {
             if (email) {
                 user = await User.findOne({email});
             }
-            user = await User.findOne({username});
-
+            
+            else {
+             user = await User.findOne({username});
+           }
+            
             if (!user) {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Invalid credentials !!!!!')
             }
@@ -138,17 +141,23 @@ class AuthController {
     
         try {
             const {body: {email, username}} = req;
-            if(!validator.isEmail(email)) {
-                return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Invalid email address !!!`);
-            }
             
             let db_user;
             if (email) {
+                  
+                if(!validator.isEmail(email)) {
+                    return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Invalid email address !!!`);
+                }
+            
                 db_user = await User.findOne({email: email.toLowerCase()});
+                
             }
             
-            db_user = await User.findOne({username});
-
+            else {
+                console.log(username);
+                db_user = await User.findOne({username});
+            }
+            
             if (!db_user) {
                 return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `User not found !!!`)
             }

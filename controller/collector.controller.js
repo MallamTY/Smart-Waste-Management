@@ -4,6 +4,7 @@ import { Collector } from "../assessories/collector.class.js";
 import { Response } from "../assessories/response.class.js";
 import validator from "validator";
 import { uploads } from "../utility/cloudinary.js";
+import teamModel from "../model/team.model.js";
 
 
 
@@ -164,7 +165,7 @@ class CollectorController{
      * Delete Collector Controller
      * @param {Object} req - Request object
      * @param {Object} res - Response object
-     * @property { String } req.params.id - CollectorID
+     * @property { String } req.params.id - CollectorI
      * @returns {JSON} - A JSON object representing the status, statusCode, message, and deleted collector details
      */
 
@@ -173,19 +174,90 @@ class CollectorController{
             
             const {body: {collector_id}} = req;
 
-            const deleted_user = await collectorModel.findByIdAndDelete(collector_id);
+            const db_collector = await collectorModel.findById(collector_id);
 
+            if (db_collector.team) {
+                const team = await teamModel.findById(db_collector.team);
+                console.log(team.member.includes(collector_id))
+                if (!team) {
+                    return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, 'Error obtaining team details this');
+                }
+                
+                if (team.leader1 !== null) {
+                    if (team.leader1.toString() === collector_id) {
             
-            if (deleted_user === null) {
-                return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, 'Collector already deleted');
+                        const updated_team = await teamModel.findByIdAndUpdate({_id: db_collector.team}, {$unset: {leader1: ""}}, {new: true});
+       
+                        if (!updated_team) {
+                            return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, 'Error deleting collector this time, please try again !!!');
+                        }
+                        const deleted_collector = await collectorModel.findOneAndDelete({_id: collector_id});
+
+                        if (!deleted_collector) {
+                            return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, 'Error deleting collector this time, please try again !!!');
+                        }
+
+                        return Response.successResponse(res, StatusCodes.OK, 'Collector successfully deleted', deleted_collector);
+
+                    }
+
+                }
+
+                else if (team.leader2 !== null) {
+                    if (team.leader2.toString() === collector_id) {
+
+                        const updated_team = await teamModel.findByIdAndUpdate({_id: db_collector.team}, {$unset: {leader2: ""}}, {new: true});
+        
+                        if (!updated_team) {
+                            return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, 'Error deleting collector this time, please try again !!!');
+                        }
+                        const deleted_collector = await collectorModel.findOneAndDelete({_id: collector_id});
+        
+                        if (!deleted_collector) {
+                            return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, 'Error deleting collector this time, please try again !!!');
+                        }
+        
+                        return Response.successResponse(res, StatusCodes.OK, 'Collector successfully deleted', deleted_collector);
+                       }
+                }
+                
+                
+                else if (team.member.includes(collector_id)) {
+                    console.log(team.member.includes(collector_id));
+                    if (team.member.length === 1) {
+                        const updated_team = await teamModel.findByIdAndUpdate({_id: team.id}, {$unset: {member: []}}, {new: true});
+    
+                        const deleted_collector = await collectorModel.findOneAndDelete({_id: collector_id});
+
+                        if (!deleted_collector) {
+                            return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, 'Error deleting collector this time, please try again !!!');
+                        }
+    
+                        return Response.successResponse(res, StatusCodes.OK, 'Collector successfully removed', deleted_collector    );
+                    }
+    
+                    else if (team.member.length > 1) {
+                        const updated_team = await teamModel.findByIdAndUpdate({_id: team.id}, {$pull: {member: collector_id}}, {new: true});
+    
+                        const deleted_collector = await collectorModel.findOneAndDelete({_id: collector_id});
+
+                        if (!deleted_collector) {
+                            return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, 'Error deleting collector this time, please try again !!!');
+                        }
+
+                        return Response.successResponse(res, StatusCodes.OK, 'Collector successfully removed', deleted_collector);
+                    }
+
+                }
             }
 
-            if (!deleted_user) {
-                return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Unable to delete collector this time');
+            const deleted_collector = await collectorModel.findOneAndDelete({_id: collector_id});
+
+            if (!deleted_collector) {
+                return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, 'Error deleting collector this time, please try again !!!');
             }
 
-            return Response.successResponse(res, StatusCodes.OK, 'Collector successfully deleted', deleted_user);
-
+            return Response.successResponse(res, StatusCodes.OK, 'Collector successfully removed', deleted_collector);
 
         } catch (error) {
             return Response.failedResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, error.message)

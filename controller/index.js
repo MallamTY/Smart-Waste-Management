@@ -9,6 +9,8 @@ import containerController from "./container.controller.js";
 // Users endpoints controller
 
 const signUp = userController.SignUp;
+const getUser = userController.getUser;
+const getAllUser = userController.getAllUser;
 
 
 
@@ -66,7 +68,9 @@ const deleteTeam = teamController.deleteTeam;
 
 
 export const UserController = {
-    signUp
+    signUp,
+    getUser,
+    getAllUser
 }
 
 

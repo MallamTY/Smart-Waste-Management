@@ -2,12 +2,15 @@
 import {StatusCodes} from 'http-status-codes';
 import { User } from '../assessories/user.class.js';
 import { uploads } from '../utility/cloudinary.js';
+import UserModel from '../model/user.model.js';
 import validator from 'validator';
 import { Response } from '../assessories/response.class.js';
 import Token from '../model/token.model.js';
 import { sendOTP} from '../utility/emailSender.js';
 import registeredEmailModel from '../model/users.email.model.js';
 import { generateOTP } from '../utility/otp.js';
+import { response } from 'express';
+import userModel from '../model/user.model.js';
 
 
 
@@ -80,6 +83,42 @@ class UserController {
             return Response.failedResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, error.message)
         }
 
+    }
+
+    getUser = async (req, res, next) => {
+        try {
+            const {user: {user_id}} = req;
+
+        if (!user_id) {
+            return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'User_id must be specified');
+        }
+
+        const db_user = await UserModel.findById(user_id);
+
+        if (!db_user) {
+            return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'User not found');
+        }
+
+        return Response.successResponse(res, StatusCodes.OK, 'User found ...', db_user);
+        } catch (error) {
+            return Response.failedResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, error.message);
+        }
+    }
+
+    getAllUser = async(req, res, next) => {
+        try {
+            
+            const db_users = await UserModel.find();
+
+            if(!db_users) {
+                return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'No user found in the database');
+            }
+
+            return Response.successResponse(res, StatusCodes.OK, 'User found', db_users);
+
+        } catch (error) {
+            return Response.failedResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, error.message);
+        }
     }
 }
 
