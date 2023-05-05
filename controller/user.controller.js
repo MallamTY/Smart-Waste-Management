@@ -1,7 +1,7 @@
 
 import {StatusCodes} from 'http-status-codes';
 import { User } from '../assessories/user.class.js';
-import { uploads } from '../utility/cloudinary.js';
+import pick from 'lodash.pick';
 import UserModel from '../model/user.model.js';
 import validator from 'validator';
 import { Response } from '../assessories/response.class.js';
@@ -60,7 +60,7 @@ class UserController {
             else{
                 
                 
-                const created_user = await user.save();
+                let created_user = await user.save();
 
                 if (created_user) {
                 
@@ -69,6 +69,11 @@ class UserController {
                     await Token.create({token: otp, user: created_user.id, expires, type: 'Verification OTP'});
 
                     await sendOTP(user.email, user.username, otp);
+
+                    let user = [];
+
+                    user = ['_id', 'first_name', 'last_name', 'middle_name', 'profile_image_secure_url', 'profile_image_url', 'image_public_id', 'role', 'address', 'phone'];
+                    created_user = pick(created_user, user);
 
                     return Response.successResponse(res, StatusCodes.CREATED, `An OTP has been sent to your email address !!!!`, created_user);
                 }
@@ -93,11 +98,18 @@ class UserController {
             return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'User_id must be specified');
         }
 
-        const db_user = await UserModel.findById(user_id);
+        let db_user = await UserModel.findById(user_id);
 
         if (!db_user) {
             return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'User not found');
         }
+
+        let user = [];
+
+        user = ['_id', 'first_name', 'last_name', 'middle_name', 'profile_image_secure_url', 'profile_image_url', 'image_public_id', 'role', 'address', 'phone'];
+        db_user = pick(db_user, user);
+
+
 
         return Response.successResponse(res, StatusCodes.OK, 'User found ...', db_user);
         } catch (error) {
@@ -108,13 +120,22 @@ class UserController {
     getAllUser = async(req, res, next) => {
         try {
             
-            const db_users = await UserModel.find();
+            let db_users = await UserModel.find();
 
             if(!db_users) {
                 return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'No user found in the database');
             }
-
-            return Response.successResponse(res, StatusCodes.OK, 'User found', db_users);
+        
+            let db_users_holder = [];
+            let user = [];
+            db_users.forEach(db_user => {
+                user = ['_id', 'first_name', 'last_name', 'middle_name', 'profile_image_secure_url', 'profile_image_url', 'image_public_id', 'role', 'address', 'phone'];
+                const db_useri = pick(db_user, user);
+                db_users_holder.push(db_useri);
+        
+            })
+            
+            return Response.successResponse(res, StatusCodes.OK, 'User found', db_users_holder);
 
         } catch (error) {
             return Response.failedResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, error.message);
