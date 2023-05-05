@@ -9,9 +9,9 @@ const router = express.Router();
 
 router.post('/signup', multerUploads, UserController.signUp);
 
-router.get('/get-user', Auth.auth,UserController.getUser);
+router.get('/get-single', Auth.auth,UserController.getUser);
 
-router.get('/get-all-user', Auth.auth, Auth.adminAuth,UserController.getAllUser);
+router.get('/get-all', Auth.auth, Auth.adminAuth,UserController.getAllUser);
 
 
 
