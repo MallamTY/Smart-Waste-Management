@@ -18,7 +18,7 @@ const userAuth = (req, res, next) => {
         next();
     } catch (error) {
         return Response.failedResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, error.message);
-    } 
+    }  1
 }
 
 

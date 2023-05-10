@@ -10,7 +10,6 @@ import { sendOTP} from '../utility/emailSender.js';
 import registeredEmailModel from '../model/users.email.model.js';
 import { generateOTP } from '../utility/otp.js';
 import { response } from 'express';
-import userModel from '../model/user.model.js';
 
 
 
@@ -70,10 +69,10 @@ class UserController {
 
                     await sendOTP(user.email, user.username, otp);
 
-                    let user = [];
+                    let user_picker = [];
 
-                    user = ['_id', 'first_name', 'last_name', 'middle_name', 'profile_image_secure_url', 'profile_image_url', 'image_public_id', 'role', 'address', 'phone'];
-                    created_user = pick(created_user, user);
+                    user_picker = ['_id', 'first_name', 'last_name', 'middle_name', 'profile_image_secure_url', 'profile_image_url', 'image_public_id', 'role', 'address', 'phone'];
+                    created_user = pick(created_user, user_picker);
 
                     return Response.successResponse(res, StatusCodes.CREATED, `An OTP has been sent to your email address !!!!`, created_user);
                 }
