@@ -23,43 +23,64 @@ class AuthController {
     Login = async (req, res) => {
         try {
             
-            const {body: {username, password, email}} = req;
+            const {body: {login_param, password}} = req;
             
-            if(!(username || email) && !password) {
+            if(!login_param && !password) {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, `All fields must be filled`)
             }
         
             let user;
 
-            if (email) {
-                user = await User.findOne({email});
+            user = await User.findOne({email: login_param});
+
+            if (user) {
+                const match = await bcrypt.compare(password, user.password);
+                if (!match) {
+                    return Response.failedResponse(res, StatusCodes.BAD_REQUEST, `Invalid login credentials !!!`)
+                }
+            
+                if (user.isEmailVerified === false) {
+                    return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Account not verified yet, check your registered email for otp to verify your email !!!`);
+                }
+                
+                const token = tokenGenerator(user.id, user.role, user.email, user.username);
+            
+                return res.status(StatusCodes.OK).json({
+                    status: `success`,
+                    message: `Login successful ...`,
+                    token
+                })
+                
             }
             
             else {
-             user = await User.findOne({username});
+                user = await User.findOne({username: login_param});
+                if (user) {
+                    const match = await bcrypt.compare(password, user.password);
+                
+                    if (!match) {
+                        return Response.failedResponse(res, StatusCodes.BAD_REQUEST, `Invalid login credentials !!!`)
+                    }
+                
+                    if (user.isEmailVerified === false) {
+                        return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Account not verified yet, check your registered email for otp to verify your email !!!`);
+                    }
+                    
+                    const token = tokenGenerator(user.id, user.role, user.email, user.username);
+                
+                    return res.status(StatusCodes.OK).json({
+                        status: `success`,
+                        message: `Login successful ...`,
+                        token
+                    })
+                }
+                
+                if (user) {
+                    return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Invalid credentials !!!!!')
+                }
+            
            }
-            
-            if (!user) {
-                return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Invalid credentials !!!!!')
-            }
-            const match = await bcrypt.compare(password, user.password);
-            
-            if (!match) {
-                return Response.failedResponse(res, StatusCodes.BAD_REQUEST, `Invalid login credentials !!!`)
-            }
-        
-            if (user.isEmailVerified === false) {
-                return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, `Account not verified yet, check your registered email for otp to verify your email !!!`);
-            }
-            
-            const token = tokenGenerator(user.id, user.role, user.email, user.username);
-        
-            return res.status(StatusCodes.OK).json({
-                status: `success`,
-                message: `Login successful ...`,
-                token
-            })
-            
+    
         
         } catch (error) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
