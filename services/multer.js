@@ -14,6 +14,7 @@ const filefilter= (req, file, callback) => {
     }
 }
 export const multerUploads = multer({ storage, fileFilter: filefilter }).single('image');
+
 export const multiMulterUploads = multer({storage}).any();
 
 
