@@ -73,7 +73,7 @@ class EmailController {
     deleteEmail = async(req, res) => {
         try {
             
-            const {body: {id}} = req;
+            const {params: {id}} = req;
 
             const deletedEmail = await registeredEmailModel.findByIdAndDelete(id);
 

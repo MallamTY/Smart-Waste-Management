@@ -13,7 +13,7 @@ router.get('/get-single', EmailController.getSingleEmail);
 
 router.get('/get-all', EmailController.getAllEmail);
 
-router.delete('/delete', EmailController.deleteEmail);
+router.delete('/delete/:id', EmailController.deleteEmail);
 
 
 export default router;

@@ -147,7 +147,7 @@ class ContainerController {
     deleteContainer = async(req, res) => {
         try {
             
-            const {body: {container_id}} = req;
+            const {params: {container_id}} = req;
 
             const deletedContainer = await containerModel.findByIdAndDelete(container_id);
 

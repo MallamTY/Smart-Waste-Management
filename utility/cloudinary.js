@@ -22,8 +22,9 @@ const cloudConfig = cloudinary.v2.config({
 })
 
 export const uploads = async (body, folder) => {
-    const dataUri = datauri(body);
-    return cloudinary.v2.uploader.upload(dataUri.content,{resource_type: 'auto', 
+    // const dataUri = datauri(body);
+    // console.log(dataUri);
+    return cloudinary.v2.uploader.upload(body.image,{resource_type: 'auto', 
     use_filename: true,
     folder: folder})
     .then(result => {

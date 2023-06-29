@@ -48,7 +48,7 @@ class CollectorController{
 
         
                 
-                const cloud_collector_details = await uploads(req, 'Smart-Waste-Collector');
+                const cloud_collector_details = await uploads(req.body, 'Smart-Waste-Collector');
                 const created_user = await collector.save(cloud_collector_details.url, cloud_collector_details.secure_url, cloud_collector_details.public_id);
                
                 if (!created_user) {

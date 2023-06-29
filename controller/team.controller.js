@@ -294,11 +294,14 @@ class TeamController {
     deleteTeam = async(req, res) => {
         try {
 
-            const {body: {team_id}} = req;
+            const {params: {team_id}} = req;
 
             const deleted_team = await teamModel.findOneAndDelete({_id: team_id});
 
 
+            if (!deleted_team) {
+                return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, 'Error deleting team record this time');
+            }
 
             if (deleted_team.leader1 !== null) {
                 await collectorModel.findByIdAndUpdate({_id: deleted_team.leader1}, {$unset: {team: ""}});
@@ -313,10 +316,6 @@ class TeamController {
 
                     await collectorModel.findByIdAndUpdate({_id: collector_id}, {$unset: {team: ""}})
                 });
-            }
-      
-            if (!deleted_team) {
-                return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, 'Error deleting team record this time');
             }
 
             return Response.successResponse(res, StatusCodes.OK, 'Team record successfully deleted', deleted_team);

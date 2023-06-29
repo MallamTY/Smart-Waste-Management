@@ -17,7 +17,7 @@ router.put('/add-object', ContainerController.addObject);
 
 router.put('/update', ContainerController.updateContainer);
 
-router.delete('/delete', ContainerController.deleteContainer);
+router.delete('/delete/:container_id', ContainerController.deleteContainer);
 
 
 export default router;

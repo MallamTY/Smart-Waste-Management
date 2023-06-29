@@ -19,7 +19,7 @@ router.get('/get-all', teamController.getAllTeam);
 
 router.put('/update', teamController.updatedTeam);
 
-router.delete('/delete', teamController.deleteTeam);
+router.delete('/delete/:team_id', teamController.deleteTeam);
 
 
 
