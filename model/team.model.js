@@ -18,19 +18,19 @@ const teamSchema = new mongoose.Schema({
     },
     
     leader1: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Object,
         ref: 'collector',
         default: null
     },
 
     leader2: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Object,
         ref: 'collector',
         default: null
     },
 
     member: {
-        type: [mongoose.Schema.Types.ObjectId],
+        type: [ Object ],
         ref: 'collector',
         default: []
     }

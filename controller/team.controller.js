@@ -1,7 +1,7 @@
 import teamModel from "../model/team.model.js";
 import {Response} from '../assessories/response.class.js'
-import { StatusCodes } from "http-status-codes";
-import { trusted } from "mongoose";
+import { StatusCodes } from "http-status-codes";    
+import pick from "lodash.pick";
 import collectorModel from "../model/collector.model.js";
 
 
@@ -64,61 +64,57 @@ class TeamController {
 
         const {body: {collector_id, team_name, position}} = req;
 
-        const team = await teamModel.findOne({name: team_name});
+        const collector = await collectorModel.findById(collector_id);
 
+        const team = await teamModel.findOne({name: team_name});
         if ((!team)) {
             return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Team not registered');
         }
+        const member = [];
+        team.member.forEach((membr) => {
+            member.push(membr._id.toString());
+        })
 
-        const check_collector = team.member.includes(collector_id);
-        if (check_collector || team.leader1 == collector_id || team.leader2 == collector_id) {
+        if (team.leader1 && team.leader1._id == collector_id || team.leader2 && team.leader2._id == collector_id || member.includes(collector_id)){
             return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'User already in the team')
         }
+        if (position === "member" ) {
+            if (team.member.length === 2) {
+                return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Ordinary team members cannot be more than two. Consider adding as a team lead or assitanct team lead instead')
+            }
+            else {
 
-        else if (team.leader1 && team.leader2 && team.member.length === 2) {
-            return Response.failedResponse (res, StatusCodes.BAD_REQUEST, 'Team completed already');
+                team.member.push(collector);
+                await team.save();
+
+                await collectorModel.findByIdAndUpdate({_id: collector_id}, {team: team.id});
+
+                return  Response.successResponse(res, StatusCodes.OK, 'User added as team member', team);
+            }
         }
-        
-        else {
 
-            if (position === "member" ) {
+        if (position === "leader1" ) {
+            if (team.leader1 !== null) {
+                return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Team alread has a lead')
 
-                if (team.member.length === 2) {
-                    return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Ordinary team members cannot be more than two. Consider adding as a team lead or assitanct team lead instead')
-                }
-                else {
+            }
+            const updated_team = await teamModel.findOneAndUpdate({name: team_name}, {$set: {leader1: collector}}, {new: true});
 
-                    team.member.push(collector_id);
-                    await team.save();
-    
-                    await collectorModel.findByIdAndUpdate({_id: collector_id}, {team: team.id});
-    
-                    return  Response.successResponse(res, StatusCodes.OK, 'User added as team member', team);
-                }
+            await collectorModel.findByIdAndUpdate({_id: collector_id}, {team: team.id});
+
+            return Response.successResponse(res, StatusCodes.OK, 'User added as team lead', updated_team);
+        }
+
+        else if (position === "leader2") {
+            if (team.leader2 !== null) {
+                return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Team alread has an assistant team lead')
             }
 
-            else if (position === "leader1" ) {
-                if (team.leader1 !== null) {
-                    return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Team alread has a lead')
-                }
-                const updated_team = await teamModel.findOneAndUpdate({name: team_name}, {$set: {leader1: collector_id}}, {new: true});
+            const updated_team = await teamModel.findOneAndUpdate({name: team_name}, {$set: {leader2: collector}}, {new: true});
 
-                await collectorModel.findByIdAndUpdate({_id: collector_id}, {team: team.id});
-
-                return Response.successResponse(res, StatusCodes.OK, 'User added as team lead', updated_team);
-            }
-
-            else if (position === "leader2") {
-                if (team.leader2 !== null) {
-                    return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Team alread has an assistant team lead')
-                }
-
-                const updated_team = await teamModel.findOneAndUpdate({name: team_name}, {$set: {leader2: collector_id}}, {new: true});
-
-                await collectorModel.findByIdAndUpdate({_id: collector_id}, {team: team.id});
-                
-                return Response.successResponse(res, StatusCodes.OK, 'User added as assistant team lead', updated_team);
-            }
+            await collectorModel.findByIdAndUpdate({_id: collector_id}, {team: team.id});
+            
+            return Response.successResponse(res, StatusCodes.OK, 'User added as assistant team lead', updated_team);
         }
 
        } catch (error) {
@@ -146,8 +142,8 @@ class TeamController {
             }
 
             if (team.leader1 !== null) {
-                if (team.leader1.toString() === collector_id) {
-                    const updated_team = await teamModel.findByIdAndUpdate({_id: team_id}, {$unset: {leader1: ""}}, {new: true});
+                if (team.leader1._id.toString() === collector_id) {
+                    const updated_team = await teamModel.findByIdAndUpdate({_id: team_id}, {$unset: {leader1: null}}, {new: true});
 
                     await collectorModel.findByIdAndUpdate({_id: collector_id}, {$unset: {team: ""}});
 
@@ -157,16 +153,20 @@ class TeamController {
            
            if (team.leader2 !== null) {
 
-                if (team.leader2.toString() === collector_id) {
-                    const updated_team = await teamModel.findByIdAndUpdate({_id: team_id}, {$unset: {leader2: ""}}, {new: true});
+                if (team.leader2._id.toString() === collector_id) {
+                    const updated_team = await teamModel.findByIdAndUpdate({_id: team_id}, {$unset: {leader2: null}}, {new: true});
 
                     await collectorModel.findByIdAndUpdate({_id: collector_id}, {$unset: {team: ""}});
 
                     return Response.successResponse(res, StatusCodes.OK, 'Collector successfully removed', updated_team);
                 }
            }
-            
-            if (team.member.includes(collector_id)) {
+           const member = [];
+           team.member.forEach((membr) => {
+               member.push(membr._id.toString());
+           })
+           
+            if (member.includes(collector_id)) {
                 if (team.member.length === 1) {
                     const updated_team = await teamModel.findByIdAndUpdate({_id: team_id}, {$unset: {member: []}}, {new: true});
 
@@ -176,11 +176,18 @@ class TeamController {
                 }
 
                 else if (team.member.length > 1) {
-                    const updated_team = await teamModel.findByIdAndUpdate({_id: team_id}, {$pull: {member: collector_id}}, {new: true});
+                    
+                    team.member.forEach((member) => {
+                        console.log(collector_id === member._id.toString());
+                        if (collector_id === member._id.toString()) {
+                            team.member.splice(team.member.indexOf(member), 1);
+                            team.save();
+                        }
+                    })
 
                     await collectorModel.findByIdAndUpdate({_id: collector_id}, {$unset: {team: ""}});
 
-                    return Response.successResponse(res, StatusCodes.OK, 'Collector successfully removed', updated_team);
+                    return Response.successResponse(res, StatusCodes.OK, 'Collector successfully removed', team);
                 }
                 
           }
