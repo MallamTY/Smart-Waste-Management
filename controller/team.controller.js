@@ -242,7 +242,7 @@ class TeamController {
 
     getAllTeam = async(req, res) => {
         try {
-            const teams = await teamModel.find();
+            const teams = await teamModel.find().sort({createdAt: -1});
 
             if (!teams) {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'No registered team at the moment');

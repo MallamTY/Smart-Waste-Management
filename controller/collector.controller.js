@@ -102,7 +102,7 @@ class CollectorController{
     getAllCollector = async(req, res) => {
         try {
             
-            const collectors = await collectorModel.find();
+            const collectors = await collectorModel.find().sort({createdAt: -1});
 
             if (!collectors) {
                 return Response.failedResponse(res, StatusCodes.OK, 'No COllector in the database currently')

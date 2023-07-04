@@ -9,6 +9,10 @@ const containerSchema = new mongoose.Schema({
         trim: true,
         required: true
     },
+    location_link: {
+        type: String,
+        required: true
+    },
 
     volume: {
         type: Number,
@@ -17,7 +21,7 @@ const containerSchema = new mongoose.Schema({
     },
 
     team_responsible: {
-        type: String,
+        type: mongoose.Types.ObjectId,
         required: true,
         trim: true,
         ref: 'team'
@@ -28,13 +32,37 @@ const containerSchema = new mongoose.Schema({
     },
 
     filled_count: {
-        type: [Number],
+        type: Number,
+        default: 0
     },
 
-    filled_timestamp: {
-        type: [Date],
+    volume_status: {
+        type: Number
+    },
 
+    percentage_level: {
+        type: Number
+    },
+
+    last_evacuation: {
+        type: Date,
+    },
+
+    week_volume: {
+        type: Number
+    },
+    monthly_volume: {
+        type: Number
+    },
+
+    week_data_for_chart: {
+        type: Array
+    },
+
+    month_data_for_chart: {
+        type: Array
     }
+
 },
 {timestamps: true}
 );

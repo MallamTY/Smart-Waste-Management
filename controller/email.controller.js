@@ -41,7 +41,7 @@ class EmailController {
     getAllEmail = async(req, res) => {
         try {
             
-            const emails = await registeredEmailModel.find();
+            const emails = await registeredEmailModel.find().sort({createdAt: -1});
 
             if (!emails) {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'No email registered this time');

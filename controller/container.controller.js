@@ -16,8 +16,8 @@ class ContainerController {
 
        try {
         
-        const {body: {location, volume, team}} = req;
-
+        const {body: {location, volume, team, latitude, longitude}} = req;
+        const url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
         if (!location || !volume) {
             return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'All field is required');
         }
@@ -32,7 +32,7 @@ class ContainerController {
         if (!db_team) {
             return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'Team not registered yet');
         }
-        const container = await containerModel.create({location, volume, team_responsible: team});
+        const container = await containerModel.create({location, volume, team_responsible: db_team._id, location_link: url});
 
         if (!container) {
             return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, 'Unable to register container this time, please try again');
@@ -48,7 +48,7 @@ class ContainerController {
     getAllContainer = async(req, res) => {
         try {
             
-            const containers = await containerModel.find();
+            const containers = await containerModel.find().sort({createdAt: 1}).populate('team');
 
             if (!containers) {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'No container registered this time');
@@ -64,7 +64,7 @@ class ContainerController {
         try {
             const {body: {container_id}} = req;
 
-            const container = await containerModel.findById(container_id);
+            const container = await containerModel.findById(container_id).populate('team');
 
             if (!container) {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'container record not found');
@@ -124,18 +124,25 @@ class ContainerController {
 
             const new_volume = container.volume_status + object_volume;
             const container_threshold = container.volume - (0.5 * container.volume);
-            if (new_volume > container_threshold + 5) {
+            if (new_volume > container_threshold) {
                 return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'Container will be overfilled with this object');
             }
 
-            else if (new_volume < container_threshold + 5) {
+            else if (new_volume < container_threshold) {
                 container.volume_status = new_volume;
+                container.percentage_level = (new_volume/container.volume) * 100
                 await container.save();
 
                 const container_threshold = container.volume - (0.5 * container.volume);
-                if (container.volume_status === (container_threshold || container_threshold + 1 || container_threshold + 2)) {
-                    
-                    //Implement SMS notification to collector here.
+                if (container.volume_status >= (container_threshold || container_threshold + 1 || container_threshold + 2)) {
+                     //Implement SMS notification to collector here.
+
+                     container.volume_status = 0;
+                     container.percentage_level = 0;
+                     container.filled_count += 1;
+                     container.save();
+                    return Response.successResponse(res, StatusCodes.OK, 'Container threshold reached and message has been sent to the team for evacuation', container);
+                   
                 }
                 return Response.successResponse(res, StatusCodes.OK, 'Object added to container ...', container);
             }
