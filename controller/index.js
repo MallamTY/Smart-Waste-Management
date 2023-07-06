@@ -33,6 +33,7 @@ const getAllContainer = containerController.getAllContainer;
 const getSingleContainer = containerController.getSingleContainer;
 const updateContainer = containerController.updateContainer;
 const addObject = containerController.addObject;
+const assignToTeam = containerController.assignToTeam;
 const deleteContainer = containerController.deleteContainer;
 
 
@@ -92,7 +93,8 @@ export const ContainerController = {
     getSingleContainer,
     updateContainer,
     addObject,
-    deleteContainer
+    deleteContainer,
+    assignToTeam
 }
 
 

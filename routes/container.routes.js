@@ -13,7 +13,9 @@ router.get('/get-single', ContainerController.getSingleContainer);
 
 router.get('/get-all', ContainerController.getAllContainer);
 
-router.put('/add-object', ContainerController.addObject);
+router.post('/add-object', ContainerController.addObject);
+
+router.post('/assign-to-team', ContainerController.assignToTeam);
 
 router.put('/update', ContainerController.updateContainer);
 

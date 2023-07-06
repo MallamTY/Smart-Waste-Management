@@ -12,7 +12,7 @@ const containerSchema = new mongoose.Schema({
     location_link: {
         type: String,
         required: true
-    },
+    },  
 
     volume: {
         type: Number,
@@ -22,22 +22,23 @@ const containerSchema = new mongoose.Schema({
 
     team_responsible: {
         type: mongoose.Types.ObjectId,
-        required: true,
         trim: true,
         ref: 'team'
     },
 
     volume_status: {
-        type: Number
-    },
-
-    filled_count: {
         type: Number,
         default: 0
     },
 
-    volume_status: {
-        type: Number
+    week_filled_count: {
+        type: Number,
+        default: 0
+    },
+
+    month_filled_count: {
+        type: Number,
+        default: 0
     },
 
     percentage_level: {
