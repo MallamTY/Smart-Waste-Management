@@ -5,13 +5,10 @@ import morgan from "morgan";
 import { MONGO_URI, PORT } from "./configuration/configuration.js";
 import Route from './routes/index.js'
 import { StatusCodes } from "http-status-codes";
-
-
+import { monthlyScheduler, weeklyScheduler } from "./cron.job.js";
 
 
 const app = express();
-
-
 app.use(morgan('common'));
 app.use(cors());
 app.use(express.json());

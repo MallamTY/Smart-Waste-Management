@@ -44,13 +44,13 @@ class ContainerController {
     getAllContainer = async(req, res) => {
         try {
             
-            const containers = await containerModel.find().sort({createdAt: 1}).populate('team');
+            const containers = await containerModel.find().sort({createdAt: 1}).populate('team_responsible');
 
             if (!containers) {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'No container registered this time');
             }
 
-            return Response.successResponse(res, StatusCodes.OK, 'Emails found', containers);
+            return Response.successResponse(res, StatusCodes.OK, 'Containers found', containers);
         } catch (error) {
             Response.failedResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, error.message);
         }
@@ -186,12 +186,70 @@ class ContainerController {
             }
 
             return Response.successResponse(res, StatusCodes.OK, 'Container deleted', deletedContainer);
-
-
+    
         } catch (error) {
             return Response.failedResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, error.message);
         }
     }
+
+    weeklyDataCalculation = async() => {
+       const containers = await containerModel.find();
+       containers.forEach((container) => {
+        if (container.week_filled_count !== 0) {
+            let holder = {};
+            const week_volume = container.week_filled_count * (0.95 * container.volume);
+            const currentDate = new Date();
+            const sevenDayAgo = new Date(currentDate.getTime() - (7 * 24 * 60 * 60 * 1000));
+            
+            holder.currentDate = currentDate;
+            holder.sevenDayAgo = sevenDayAgo;
+            holder.week_volume = week_volume;
+    
+            container.week_data_for_chart.push(holder);
+            container.week_filled_count = 0;
+            container.month_filled_count += 1;
+            container.save();
+    
+            console.log(`Weekly cron job executed for non-empty container at location ${container.location}`);
+        } else {
+            console.log(`Weekly cron job executed for empty container at location ${container.location}`);
+        }
+
+       })
+     }
+
+
+     monthlyDataCalculation = async() => {
+        const containers = await containerModel.find();
+        containers.forEach((container) => {
+        if (container.month_filled_count !== 0) {
+            const holder = {};
+            const week_volumes = [];
+            container.week_data_for_chart.forEach((data) => {
+                week_volumes.push(data.week_volume);
+            })
+            const currentDate = new Date();
+            const month = currentDate.getMonth();
+            let monthInYear = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            const month_volume = week_volumes.reduce((accumulator, currentValue) =>
+                accumulator + currentValue, 0);
+
+            holder.month = monthInYear[month];
+            holder.month_volume = month_volume;
+    
+            container.month_data_for_chart.push(holder);
+            container.month_filled_count = 0;
+            container.save();
+    
+            console.log(`Monthly cron job executed for non-empty container at location ${container.location}`);
+        } else {
+            console.log(`Monthly cron job executed for empty container at location ${container.location}`);
+        }
+
+       })
+     }
+    
 }
 
 
