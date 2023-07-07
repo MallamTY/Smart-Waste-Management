@@ -75,7 +75,8 @@ class TeamController {
             member.push(membr._id.toString());
         })
 
-        if (team.leader1 && team.leader1._id == collector_id || team.leader2 && team.leader2._id == collector_id || member.includes(collector_id)){
+
+        if (team.leader1 !== "" && team.leader1._id == collector_id || team.leader2 !== "" && team.leader2._id == collector_id || member.includes(collector_id)){
             return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'User already in the team')
         }
         if (position === "member" ) {
@@ -94,7 +95,7 @@ class TeamController {
         }
 
         if (position === "leader1" ) {
-            if (team.leader1 !== null) {
+            if (team.leader1 !== "") {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Team alread has a lead')
 
             }
@@ -106,7 +107,7 @@ class TeamController {
         }
 
         else if (position === "leader2") {
-            if (team.leader2 !== null) {
+            if (team.leader2 !== "") {
                 return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Team alread has an assistant team lead')
             }
 
@@ -141,9 +142,9 @@ class TeamController {
                 return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, 'Error obtaining team details this');
             }
 
-            if (team.leader1 !== null) {
+            if (team.leader1 !== "") {
                 if (team.leader1._id.toString() === collector_id) {
-                    const updated_team = await teamModel.findByIdAndUpdate({_id: team_id}, {$unset: {leader1: null}}, {new: true});
+                    const updated_team = await teamModel.findByIdAndUpdate({_id: team_id}, {$unset: {leader1: ""}}, {new: true});
 
                     await collectorModel.findByIdAndUpdate({_id: collector_id}, {$unset: {team: ""}});
 
@@ -151,10 +152,10 @@ class TeamController {
                 }
             }
            
-           if (team.leader2 !== null) {
+           if (team.leader2 !== "") {
 
                 if (team.leader2._id.toString() === collector_id) {
-                    const updated_team = await teamModel.findByIdAndUpdate({_id: team_id}, {$unset: {leader2: null}}, {new: true});
+                    const updated_team = await teamModel.findByIdAndUpdate({_id: team_id}, {$unset: {leader2: ""}}, {new: true});
 
                     await collectorModel.findByIdAndUpdate({_id: collector_id}, {$unset: {team: ""}});
 

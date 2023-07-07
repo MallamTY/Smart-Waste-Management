@@ -20,13 +20,13 @@ const teamSchema = new mongoose.Schema({
     leader1: {
         type: Object,
         ref: 'collector',
-        default: null
+        default: ""
     },
 
     leader2: {
         type: Object,
         ref: 'collector',
-        default: null
+        default: ""
     },
 
     member: {
