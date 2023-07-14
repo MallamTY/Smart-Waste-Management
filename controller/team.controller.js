@@ -311,11 +311,11 @@ class TeamController {
                 return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, 'Error deleting team record this time');
             }
 
-            if (deleted_team.leader1 !== null) {
+            if (deleted_team.leader1 !== "") {
                 await collectorModel.findByIdAndUpdate({_id: deleted_team.leader1}, {$unset: {team: ""}});
             }
 
-            if (deleted_team.leader2 !== null) {
+            if (deleted_team.leader2 !== "") {
                 await collectorModel.findByIdAndUpdate({_id: deleted_team.leader2}, {$unset: {team: ""}});
             }
 
