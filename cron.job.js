@@ -6,7 +6,6 @@ export const weeklyScheduler = cron.schedule('50 58 23 * * 0', () => {
     containerController.weeklyDataCalculation();
 });
 
-
 export const monthlyScheduler = cron.schedule('59 58 23 30 * *', () => {
     containerController.monthlyDataCalculation();
 });
