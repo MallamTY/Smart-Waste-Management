@@ -8,24 +8,24 @@ export class Collector extends Person {
         super(firstname, middlename, lastname, email, phone, address)
      }
      
-     save = async( profile_image_url, profile_image_secure_url, image_public_id) => {
+     save = async( image_url) => {
         
         if (this.middlename === "" && this.email === "") {
-            return await collectorModel.create({first_name: this.firstname, last_name: this.lastname, phone: this.phone, address: this.address, profile_image_url,profile_image_secure_url, image_public_id})
+            return await collectorModel.create({first_name: this.firstname, last_name: this.lastname, phone: this.phone, address: this.address, image_url})
         }
 
         else if (this.middlename === "" && this.email !== "") {
 
-            return await collectorModel.create({first_name: this.firstname, last_name: this.lastname, email: this.email, phone: this.phone, address: this.address, profile_image_url,profile_image_secure_url, image_public_id})
+            return await collectorModel.create({first_name: this.firstname, last_name: this.lastname, email: this.email, phone: this.phone, address: this.address, image_url})
         }
            
         else if (this.middlename !== "" && this.email === "")
         {
-            return await collectorModel.create({first_name: this.firstname, last_name: this.lastname, middle_name: this.middlename, phone: this.phone, address: this.address, profile_image_url,profile_image_secure_url, image_public_id})
+            return await collectorModel.create({first_name: this.firstname, last_name: this.lastname, middle_name: this.middlename, phone: this.phone, address: this.address, image_url})
         }
         else {
 
-            return await collectorModel.create({first_name: this.firstname, last_name: this.lastname, middle_name: this.middlename, email: this.email, phone: this.phone, address: this.address, profile_image_url,profile_image_secure_url, image_public_id})
+            return await collectorModel.create({first_name: this.firstname, last_name: this.lastname, middle_name: this.middlename, email: this.email, phone: this.phone, address: this.address, image_url})
         }
 
      }

@@ -32,15 +32,11 @@ const collectorSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'team' 
     },
-     profile_image_url: {
+
+    image_url: {
         type: String
     },
-    profile_image_secure_url: {
-        type: String
-    },
-    image_public_id: {
-        type: String
-    },
+
     address: {
         type: String,
         required: true,
