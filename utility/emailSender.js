@@ -45,6 +45,16 @@ export const sendOTP = async(to, username, otp) => {
     await sendEmail(email, subject, html);
 };
 
+export const sendFilledContainer = async(leaderName, location, link, to) => {
+  
+    const otpTemplateValues = Templates.filledContainerTemplate(leaderName, location, link)
+    const email = to;
+    const html = otpTemplateValues.html;
+    const subject = 'Filled Container Notification';
+
+    await sendEmail(email, subject, html);
+};
+
 
 
 export const sendResetPasswordLink = async(to, username, token) => {

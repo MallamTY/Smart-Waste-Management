@@ -3,6 +3,7 @@ import {Response} from '../assessories/response.class.js';
 import { StatusCodes } from "http-status-codes";
 import containerModel from "../model/container.model.js";
 import teamModel from "../model/team.model.js";
+import { sendFilledContainer } from '../utility/emailSender.js';
 
 
 
@@ -115,7 +116,8 @@ class ContainerController {
     addObject = async (req, res) => {
         try {
             const {body: {container_id, object_volume}} = req;
-
+            const containerr = await containerModel.findById(container_id).populate('team_responsible');
+            
             if (!container_id || !object_volume) {
                 return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'Container ID and Object volume is required');
             }
@@ -127,18 +129,22 @@ class ContainerController {
             }
 
             const new_volume = container.volume_status + object_volume;
-            const container_threshold = container.volume - (0.05 * container.volume);
-            if (new_volume > container_threshold + 5) {
+            const container_threshold1 = container.volume - (0.05 * container.volume);
+            const container_threshold2 = container.volume - (0.03 * container.volume);
+            if (new_volume > container_threshold2) {
                 return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'Container will be overfilled with this object');
             }
 
-            else if (new_volume <= container_threshold) {
+            else if (new_volume < container_threshold2) {
                 container.volume_status = new_volume;
                 container.percentage_level = (new_volume/container.volume) * 100
                 await container.save();
-                if (container.volume_status >= (container_threshold || container_threshold + 1 || container_threshold + 2)) {
+                if (container.volume_status >= container_threshold1) {
                      //Implement SMS notification to collector here.
-
+                     const leaderName = containerr.team_responsible.leader1.first_name;
+                     const link  = containerr.location_link;
+                     const location = containerr.location;
+                     await sendFilledContainer(leaderName, location, link, containerr.team_responsible.leader1.email);
                      container.volume_status = 0;
                      container.percentage_level = 0;
                      container.week_filled_count += 1;
