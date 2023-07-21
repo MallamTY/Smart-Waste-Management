@@ -176,7 +176,7 @@ class ContainerController {
             return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Container already assigned to team');
         }
 
-        const test = await containerModel.findByIdAndUpdate({_id: container_id}, {team_responsible: team._id}, {new: true}).populate('team_responsible');
+        const test = await containerModel.findByIdAndUpdate({_id: container_id}, {team_responsible: [team._id]}, {new: true}).populate('team_responsible');
         return Response.successResponse(res, StatusCodes.OK, 'Container successfully assigned to team', test);
     }
 

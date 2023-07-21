@@ -18,15 +18,16 @@ const teamSchema = new mongoose.Schema({
     },
     
     leader1: {
-        type: Object,
+        type: Array,
         ref: 'collector',
-        default: ""
+        default: []
     },
 
     leader2: {
-        type: Object,
+        type: Array,
         ref: 'collector',
-        default: ""
+        default: []
+    
     },
 
     member: {
@@ -39,5 +40,6 @@ const teamSchema = new mongoose.Schema({
 {timestamps: true});
 
 const teamModel = mongoose.model('team', teamSchema);
+
 
 export default teamModel;

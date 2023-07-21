@@ -21,9 +21,10 @@ const containerSchema = new mongoose.Schema({
     },
 
     team_responsible: {
-        type: mongoose.Types.ObjectId,
+        type: Array,
         trim: true,
-        ref: 'team'
+        ref: 'team',
+        default: []
     },
 
     volume_status: {
