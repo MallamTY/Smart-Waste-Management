@@ -116,14 +116,14 @@ class ContainerController {
     addObject = async (req, res) => {
         try {
             const {body: {container_id, object_volume}} = req;
-            const containerr = await containerModel.findById(container_id).populate('team_responsible');
+            // const containerr = await containerModel.findById(container_id).populate('team_responsible');
             
             if (!container_id || !object_volume) {
                 return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'Container ID and Object volume is required');
             }
 
             const container = await containerModel.findById(container_id);
-
+            const team = await teamModel.findById(container.team_responsible[0]);
             if (!container) {
                 return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'Container not found !!!')
             }
@@ -141,10 +141,10 @@ class ContainerController {
                 await container.save();
                 if (container.volume_status >= container_threshold1) {
                      //Implement SMS notification to collector here.
-                     const leaderName = containerr.team_responsible.leader1.first_name;
-                     const link  = containerr.location_link;
-                     const location = containerr.location;
-                     await sendFilledContainer(leaderName, location, link, containerr.team_responsible.leader1.email);
+                     const leaderName = team.leader1[0].first_name;
+                     const link  = container.location_link;
+                     const location = container.location;
+                     await sendFilledContainer(leaderName, location, link, team.leader1[0].email);
                      container.volume_status = 0;
                      container.percentage_level = 0;
                      container.week_filled_count += 1;
