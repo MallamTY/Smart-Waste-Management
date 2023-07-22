@@ -30,22 +30,20 @@
 //    })
 //   .then(message => console.log(message.sid)).catch(err => console.log(err));
 
-import messagebird from "messagebird";
-const client = messagebird.initClient("RqpLXXItqGag10CvVVwf65fwY");
+// import messagebird from "messagebird";
+// const client = messagebird.initClient("RqpLXXItqGag10CvVVwf65fwY");
 
-client.messages.create({
-    originator : '+2347037767045',
-    recipients : [ '+2347037767045' ],
-    body : 'Hi! This is your first message'
-},
-function (err, response) {
-    if (err) {
-    console.log("ERROR:");
-    console.log(err);
-} else {
-    console.log("SUCCESS:");
-    console.log(response);
-        }
-});
-
-  
+// client.messages.create({
+//     originator : '+2347037767045',
+//     recipients : [ '+2347037767045' ],
+//     body : 'Hi! This is your first message'
+// },
+// function (err, response) {
+//     if (err) {
+//     console.log("ERROR:");
+//     console.log(err);
+// } else {
+//     console.log("SUCCESS:");
+//     console.log(response);
+//         }
+// });

@@ -52,7 +52,7 @@ export const sendFilledContainer = async(leaderName, location, link, to) => {
     const html = otpTemplateValues.html;
     const subject = 'Filled Container Notification';
 
-    await sendEmail(email, subject, html);
+    return await sendEmail(email, subject, html);
 };
 
 

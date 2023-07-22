@@ -4,6 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import containerModel from "../model/container.model.js";
 import teamModel from "../model/team.model.js";
 import { sendFilledContainer } from '../utility/emailSender.js';
+import { smsSender } from '../utility/smsService.js';
 
 
 
@@ -140,17 +141,32 @@ class ContainerController {
                 container.percentage_level = (new_volume/container.volume) * 100
                 await container.save();
                 if (container.volume_status >= container_threshold1) {
-                     //Implement SMS notification to collector here.
-                     const leaderName = team.leader1[0].first_name;
-                     const link  = container.location_link;
-                     const location = container.location;
-                     await sendFilledContainer(leaderName, location, link, team.leader1[0].email);
-                     container.volume_status = 0;
-                     container.percentage_level = 0;
-                     container.week_filled_count += 1;
-                     container.save();
-                    return Response.successResponse(res, StatusCodes.OK, 'Container threshold reached and message has been sent to the team for evacuation', container);
-                   
+
+                    const leaderName = team.leader1[0].first_name;
+                    const link  = container.location_link;
+                    const location = container.location;
+                    const phone_number = team.leader1[0].phone;
+                    const email_response = await sendFilledContainer(leaderName, location, link, team.leader1[0].email);
+                    const sms_response =  await smsSender(location, link, phone_number);
+                    console.log();
+                    container.volume_status = 0;
+                    container.percentage_level = 0;
+                    container.week_filled_count += 1;
+                    container.save();
+                    if (email_response.accepted.length > 0 && sms_response.status === 'success') {
+                        return Response.successResponse(res, StatusCodes.OK, `Container threshold reached. An SMS and Email has been sent to the ${team.name} team leader1`, container);
+                    }
+
+                    else if (email_response.accepted.length > 0 && sms_response.status !== 'success') {
+                        return Response.successResponse(res, StatusCodes.OK, `Container threshold reached. An Email has been sent to the ${team.name} team leader1`, container);
+                    }
+                    
+                    else if (email_response.accepted.length === 0 && sms_response.status === 'success') {
+                        return Response.successResponse(res, StatusCodes.OK, `Container threshold reached. An SMS alert has been sent to the ${team.name} team leader1`, container);
+                    }
+                    else {
+                        return Response.successResponse(res, StatusCodes.OK, `Container threshold reached. with no notification sent to ${team.name} team leader1`, container);
+                    }
                 }
                 return Response.successResponse(res, StatusCodes.OK, 'Object added to container ...', container);
             }
