@@ -23,6 +23,16 @@ const teamSchema = new mongoose.Schema({
         default: []
     },
 
+    authority_phone: {
+        type: String,
+        required: true
+    },
+
+    authority_email: {
+        type: String,
+        trim: true
+    },
+
     leader2: {
         type: Array,
         ref: 'collector',

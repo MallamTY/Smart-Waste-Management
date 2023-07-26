@@ -23,7 +23,7 @@ class TeamController {
 
       try {
         
-        const {body: {name, area}} = req;
+        const {body: {name, area, authority_phone, authority_email}} = req;
 
         if (!name || !area) {
             return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'All field must be filed');
@@ -34,13 +34,16 @@ class TeamController {
             return Response.failedResponse(res, StatusCodes.EXPECTATION_FAILED, 'Team with this name already exist')
         }
 
-        const created_team = await teamModel.create({name, area});
 
+        const created_team = await teamModel.create({name, area, authority_phone, authority_email});
+
+        const team_picker = ['_id', 'name', 'area', 'leader1', 'leader2', 'member'];
+        const picked_team = pick(created_team, team_picker);
         if (!created_team) {
-            return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, 'Unable to create a team this time');
+            return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, 'Unable to create a team this const time');
         }
 
-        return Response.successResponse(res, StatusCodes.CREATED, 'Team successfully created', created_team);
+        return Response.successResponse(res, StatusCodes.CREATED, 'Team successfully created', picked_team);
 
 
       } catch (error) {
@@ -298,30 +301,29 @@ class TeamController {
 
     deleteTeam = async(req, res) => {
         try {
-
             const {params: {team_id}} = req;
 
             const deleted_team = await teamModel.findOneAndDelete({_id: team_id});
-
 
             if (!deleted_team) {
                 return Response.failedResponse(res, StatusCodes.FAILED_DEPENDENCY, 'Error deleting team record this time');
             }
 
-            if (deleted_team.leader1 !== "") {
-                await collectorModel.findByIdAndUpdate({_id: deleted_team.leader1}, {$unset: {team: ""}});
+            if (deleted_team.leader1.length !== 0) {
+                await collectorModel.findByIdAndUpdate({_id: deleted_team.leader1[0]._id}, {$unset: {team: ""}});
             }
 
-            if (deleted_team.leader2 !== "") {
-                await collectorModel.findByIdAndUpdate({_id: deleted_team.leader2}, {$unset: {team: ""}});
+            if (deleted_team.leader2.length !== 0) {
+                await collectorModel.findByIdAndUpdate({_id: deleted_team.leader2[0]._id}, {$unset: {team: ""}});
             }
 
             if (deleted_team.member.length !== 0) {
                 deleted_team.member.forEach(async(collector_id) => {
 
-                    await collectorModel.findByIdAndUpdate({_id: collector_id}, {$unset: {team: ""}})
+                    await collectorModel.findByIdAndUpdate({_id: collector_id}, {$unset: {team: []}})
                 });
             }
+
 
             return Response.successResponse(res, StatusCodes.OK, 'Team record successfully deleted', deleted_team);
 

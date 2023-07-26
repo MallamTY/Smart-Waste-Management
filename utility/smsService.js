@@ -8,7 +8,7 @@ export const smsSender = (location, link, phone_number) => {
 
     const data = {
         
-        body: `Container at ${location} is filled and needs to be evacuated. Please click on this link h${link} to get the location`,
+        body: `Container at ${location} is filled and needs to be evacuated. Please click on this link ${link} to get the location`,
         from: "Filled-Bin",
         to: phone_number,
         api_token: SMS_API_KEY,

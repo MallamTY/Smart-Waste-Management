@@ -188,7 +188,8 @@ class ContainerController {
         }
 
         const db_container = await containerModel.findById(container_id);
-        if (db_container.team) {
+        console.log(db_container.team_responsible.length != 0);
+        if (db_container.team_responsible.length != 0) {
             return Response.failedResponse(res, StatusCodes.BAD_REQUEST, 'Container already assigned to team');
         }
 
